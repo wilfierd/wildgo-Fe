@@ -6,23 +6,27 @@
  *
  * @example
  * ```ts
- * import { auth, rooms } from '@/lib/api';
+ * import { auth, rooms, messages } from '@/lib/api';
  * const user = await auth.getProfile();
  * const allRooms = await rooms.getRooms();
+ * const roomMessages = await messages.getMessages(1);
  * ```
  *
  * Or import specific functions:
  * ```ts
  * import { login, register } from '@/lib/api/auth';
  * import { getRooms, createDirectRoom } from '@/lib/api/rooms';
+ * import { sendMessage, getMessages } from '@/lib/api/messages';
  * ```
  */
 
 import * as auth from './auth';
 import * as rooms from './rooms';
+import * as messages from './messages';
 
-export { auth, rooms };
+export { auth, rooms, messages };
 
 // Re-export for convenience
 export * from './auth';
 export * from './rooms';
+export * from './messages';
