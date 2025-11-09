@@ -19,6 +19,7 @@
  */
 
 import api from '../api';
+import { Message, User } from '../types';
 
 /**
  * Room Types
@@ -28,8 +29,8 @@ export interface Room {
   name: string;
   type: 'group' | 'direct';
   display_name?: string;
-  messages?: any[];
-  members?: any[];
+  messages?: Message[];
+  members?: User[];
   created_at: string;
   updated_at: string;
 }
@@ -80,6 +81,19 @@ export interface CreateDirectRoomRequest {
 export interface InviteUserRequest {
   user_id: number;
   role?: 'member' | 'admin' | 'owner';
+}
+
+export interface RoomMembershipResponse {
+  id: number;
+  user_id: number;
+  room_id: number;
+  role: string;
+  joined_at: string;
+  user: {
+    id: number;
+    username: string;
+    email: string;
+  };
 }
 
 /**
@@ -238,8 +252,8 @@ export async function getRoomParticipants(roomId: number): Promise<ParticipantRe
  * console.log('User invited successfully');
  * ```
  */
-export async function inviteUserToRoom(roomId: number, data: InviteUserRequest): Promise<any> {
-  const response = await api.post<{ data: any, message: string }>(`/v1/rooms/${roomId}/members`, data);
+export async function inviteUserToRoom(roomId: number, data: InviteUserRequest): Promise<RoomMembershipResponse> {
+  const response = await api.post<{ data: RoomMembershipResponse, message: string }>(`/v1/rooms/${roomId}/members`, data);
   return response.data.data;
 }
 
@@ -296,8 +310,9 @@ export async function markRoomAsRead(roomId: number): Promise<void> {
  */
 export async function isRoomMember(roomId: number): Promise<boolean> {
   try {
-    const participants = await getRoomParticipants(roomId);
-    return participants.length > 0;
+    await getRoomParticipants(roomId);
+    // If the API call succeeds, the user is a member (backend enforces this)
+    return true;
   } catch (error: any) {
     if (error.response?.status === 403 || error.response?.status === 404) {
       return false;
