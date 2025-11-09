@@ -680,7 +680,8 @@ async function startChat(targetUserId: number) {
 ### Display DMs with Unread Counts
 
 ```typescript
-import { getDirectRooms } from '@/lib/api/rooms';
+import { useState, useEffect } from 'react';
+import { getDirectRooms, DirectRoomResponse } from '@/lib/api/rooms';
 
 function DirectMessagesList() {
   const [dms, setDms] = useState<DirectRoomResponse[]>([]);
