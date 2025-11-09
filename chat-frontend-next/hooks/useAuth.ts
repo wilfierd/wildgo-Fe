@@ -1,8 +1,29 @@
 "use client";
 import { useState, useEffect } from 'react';
-import api from '@/lib/api';
+import { getProfile } from '@/lib/api/auth';
 import { User } from '@/lib/types';
 
+/**
+ * Custom React hook for authentication state management
+ *
+ * Handles:
+ * - User authentication state
+ * - Loading states during auth operations
+ * - User profile data
+ * - Login/logout operations
+ * - Automatic token validation on mount
+ *
+ * @returns Authentication state and methods
+ *
+ * @example
+ * ```tsx
+ * const { isAuthenticated, loading, user, login, logout } = useAuth();
+ *
+ * if (loading) return <div>Loading...</div>;
+ * if (!isAuthenticated) return <LoginForm />;
+ * return <div>Welcome {user?.username}</div>;
+ * ```
+ */
 export const useAuth = () => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
@@ -18,13 +39,18 @@ export const useAuth = () => {
     }
   }, []);
 
+  /**
+   * Fetch user profile from backend using stored JWT token
+   * Called automatically on mount if token exists
+   */
   const fetchUserProfile = async () => {
     try {
-      const response = await api.get('/auth/profile');
-      setUser(response.data);
+      const userData = await getProfile();
+      setUser(userData);
       setIsAuthenticated(true);
     } catch (error) {
-      // Token might be invalid
+      // Token might be invalid or expired
+      console.error('Failed to fetch user profile:', error);
       localStorage.removeItem('token');
       setIsAuthenticated(false);
     } finally {
@@ -32,6 +58,18 @@ export const useAuth = () => {
     }
   };
 
+  /**
+   * Login user with JWT token and optional user data
+   *
+   * @param token - JWT authentication token
+   * @param userData - Optional user data (if not provided, will fetch from server)
+   *
+   * @example
+   * ```ts
+   * const { token, user } = await loginAPI({ email, password });
+   * login(token, user);
+   * ```
+   */
   const login = (token: string, userData?: User) => {
     localStorage.setItem('token', token);
     setIsAuthenticated(true);
@@ -43,6 +81,16 @@ export const useAuth = () => {
     }
   };
 
+  /**
+   * Logout current user
+   * Clears token from localStorage and resets auth state
+   *
+   * @example
+   * ```ts
+   * logout();
+   * router.push('/login');
+   * ```
+   */
   const logout = () => {
     localStorage.removeItem('token');
     setIsAuthenticated(false);
@@ -54,6 +102,8 @@ export const useAuth = () => {
     loading,
     user,
     login,
-    logout
+    logout,
+    // Expose refetch method for manual profile updates
+    refetchProfile: fetchUserProfile
   };
 }; 

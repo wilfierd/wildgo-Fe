@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
-import api from '@/lib/api';
+import { login as loginAPI } from '@/lib/api/auth';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -19,14 +19,14 @@ export default function LoginForm() {
   const handleLogin = async () => {
     setError('');
     setLoading(true);
-    
+
     try {
-      const res = await api.post('/auth/login', { email, password });
-      const { token, user } = res.data;
-      
-      // Store token and user data
+      // Use the auth API service
+      const { token, user } = await loginAPI({ email, password });
+
+      // Store token and user data using the auth hook
       login(token, user);
-      
+
       // Role-based redirection
       if (user.role === 'admin') {
         router.push('/'); // Admin dashboard
