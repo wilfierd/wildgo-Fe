@@ -15,7 +15,7 @@
 | **Messages** | ✅ 4 endpoints | ✅ Complete | ✅ Complete | ✅ Complete | ✅ Complete |
 | **WebSocket** | ✅ 4 features | ✅ Complete | ✅ Complete | ✅ Complete | ✅ Complete |
 | **Direct Messages** | ✅ 2 endpoints | ✅ Complete | ✅ Complete | ✅ Complete | ✅ Complete |
-| **Users** | ✅ 2 endpoints | ✅ Complete | ❌ Not implemented | ❌ No UI | 🔴 Not Started |
+| **Users** | ✅ 2 endpoints | ✅ Complete | ✅ Complete | ✅ Complete | ✅ Complete |
 
 **Legend:**
 - ✅ Complete - Fully implemented and tested
@@ -155,22 +155,24 @@
 
 ---
 
-## ❌ NOT IMPLEMENTED: User API
+## ✅ COMPLETED: User API
 
-### User Endpoints ❌
-**Status:** Not implemented - Backend exists, CLI has it, Frontend missing
+### User Endpoints ✅
+**Status:** Complete - Fully implemented and integrated
 
 | Endpoint | Method | Backend | CLI | Frontend | Status |
 |----------|--------|---------|-----|----------|--------|
-| `/api/v1/users` | GET | ✅ | ✅ | ❌ | 🔴 Missing |
-| `/api/v1/users/available` | GET | ✅ | ✅ | ❌ | 🔴 Missing |
+| `/api/v1/users` | GET | ✅ | ✅ | ✅ | ✅ Complete |
+| `/api/v1/users/available` | GET | ✅ | ✅ | ✅ | ✅ Complete |
 
-**TODO: Create `lib/api/users.ts`**
+**Implemented Functions:**
 ```typescript
-// NEEDED:
-export async function getUsers(search?: string): Promise<User[]>
-export async function getAvailableUsers(): Promise<User[]>
+✅ getUsers(search?: string): Promise<User[]>
+✅ getAvailableUsers(): Promise<User[]>
+✅ getUserById(userId: number): Promise<User>
 ```
+
+**Location:** `chat-frontend-next/lib/api/users.ts`
 
 ---
 
@@ -215,27 +217,40 @@ The frontend has **ALL API layers complete** AND **core chat UI is fully integra
 
 ---
 
-### Missing UI Components
+### ✅ Completed UI Components
 
-#### Direct Messages UI ❌
-**Status:** API ready, UI not created
+#### Direct Messages UI ✅
+**Status:** Fully implemented with elegant, consistent design
 
-**TODO:**
-- [ ] Create `components/DirectMessageCard.tsx`
-  - Show other user's username
-  - Show online status (green dot)
-  - Show unread count badge
-  - Show last message preview
-  - Show timestamp
+**Completed Components:**
+- [x] `components/DirectMessageCard.tsx` ✅
+  - Shows other user's username and avatar
+  - Online status indicator (green dot)
+  - Unread count badge
+  - Last message preview
+  - Smart timestamp formatting
+  - Hover and selected states
 
-- [ ] Create `components/CreateDMButton.tsx`
-  - User search/selection
-  - Call `createDirectRoom(targetUserId)`
+- [x] `components/CreateDMButton.tsx` ✅
+  - User search/filtering
+  - Available users list with avatars
+  - Creates or opens existing DM
+  - Loading and error states
+  - Integrated in chat header
 
-**API Available:**
+- [x] `components/ui/dialog.tsx` ✅
+  - Reusable modal component
+  - Clean, minimal design
+  - DialogHeader, DialogBody, DialogFooter
+
+**Integrated Features:**
 ```typescript
-✅ getDirectRooms(): Promise<DirectRoomResponse[]>  // Returns DMs with unread counts
-✅ createDirectRoom(targetUserId: number): Promise<Room>
+✅ User search by username or email
+✅ Online status display
+✅ Unread count tracking
+✅ Last message preview
+✅ Smart timestamps (Just now, 5m ago, 2h ago, etc.)
+✅ Prevents duplicate DM creation
 ```
 
 ---
@@ -417,9 +432,9 @@ const isAdmin = user?.role === 'admin';
 | **Edit Rooms (Admin)** | ✅ | ✅ | ❌ | 🟢 Low |
 | **Delete Rooms (Admin)** | ✅ | ✅ | ❌ | 🟢 Low |
 | **Manage Members (Admin)** | ✅ | ✅ | ❌ | 🟢 Low |
-| **User Search** | ✅ | ❌ | ❌ | 🟡 Medium |
+| **User Search** | ✅ | ✅ | ✅ | ✅ Complete |
 | **Typing Indicators** | ✅ | ✅ | ❌ | 🟢 Low |
-| **Online Status** | ✅ | ✅ | ❌ | 🟢 Low |
+| **Online Status** | ✅ | ✅ | ✅ | ✅ Complete |
 | **GitHub OAuth** | ✅ | ✅ | ❌ | 🟢 Low |
 
 ---
@@ -459,30 +474,34 @@ const isAdmin = user?.role === 'admin';
 
 ### 🟡 Medium Priority (Enhanced UX)
 
-4. **Direct Messages UI**
-   - [ ] Create `components/DirectMessageList.tsx`
-   - [ ] Create `components/DirectMessageCard.tsx`
-   - [ ] Show unread counts
-   - [ ] Show online status
-   - [ ] Show last message preview
+4. **Direct Messages UI** ✅
+   - [x] Create `components/DirectMessageCard.tsx`
+   - [x] Show unread counts
+   - [x] Show online status
+   - [x] Show last message preview
+   - [x] Smart timestamp formatting
+   - [x] Create `components/CreateDMButton.tsx` for new DMs
+   - [x] User search functionality
 
-   **Estimated Effort:** 3-4 hours
+   **Status:** ✅ Completed
+   **Location:** chat-frontend-next/components/
 
-5. **Unread Tracking**
-   - [ ] Show unread badges on rooms
-   - [ ] Show unread badges on DMs
-   - [ ] Call `markRoomAsRead()` when opening room
-   - [ ] Update counts via WebSocket
+5. **Unread Tracking** ✅
+   - [x] Show unread badges on rooms
+   - [x] Show unread badges on DMs
+   - [x] Call `markRoomAsRead()` when opening room
+   - [x] Update counts via WebSocket
 
-   **Estimated Effort:** 2-3 hours
+   **Status:** ✅ Completed
+   **Location:** chat-frontend-next/app/chat/page.tsx
 
-6. **User Search & Directory**
-   - [ ] Create `lib/api/users.ts` with user endpoints
-   - [ ] Create `components/UserSearch.tsx`
-   - [ ] Create `components/UserListItem.tsx`
-   - [ ] Enable creating DMs from user search
+6. **User Search & Directory** ✅
+   - [x] Create `lib/api/users.ts` with user endpoints
+   - [x] Create user search UI in `CreateDMButton.tsx`
+   - [x] Enable creating DMs from user search
 
-   **Estimated Effort:** 3-4 hours
+   **Status:** ✅ Completed
+   **Location:** chat-frontend-next/lib/api/users.ts, components/CreateDMButton.tsx
 
 ---
 
@@ -537,6 +556,7 @@ const isAdmin = user?.role === 'admin';
 - [x] `chat-frontend-next/lib/api/auth.ts`
 - [x] `chat-frontend-next/lib/api/rooms.ts`
 - [x] `chat-frontend-next/lib/api/messages.ts`
+- [x] `chat-frontend-next/lib/api/users.ts` - ✅ User API
 - [x] `chat-frontend-next/lib/api/index.ts`
 - [x] `chat-frontend-next/lib/websocket.ts`
 - [x] `chat-frontend-next/hooks/useAuth.ts`
@@ -546,18 +566,21 @@ const isAdmin = user?.role === 'admin';
 - [x] `chat-frontend-next/components/MessageBubble.tsx`
 - [x] `chat-frontend-next/components/MessageInput.tsx`
 - [x] `chat-frontend-next/components/MessageList.tsx`
+- [x] `chat-frontend-next/components/DirectMessageCard.tsx` - ✅ DM UI
+- [x] `chat-frontend-next/components/CreateDMButton.tsx` - ✅ New DM dialog
+- [x] `chat-frontend-next/components/ui/dialog.tsx` - ✅ Modal component
 - [x] `docs/API_AUTH.md`
 - [x] `docs/API_ROOMS.md`
 - [x] `docs/API_MESSAGES.md`
 - [x] `docs/API_WEBSOCKET.md`
 - [x] `CLAUDE.md`
+- [x] `Todo.md`
 
 ### ⏳ Needs Update (Using Mock Data)
 - [ ] `chat-frontend-next/app/profile/page.tsx` - User profile
 - [ ] `chat-frontend-next/app/profile/[id]/page.tsx` - Other user profiles
 
 ### ❌ Not Created Yet (Optional/Advanced Features)
-- [ ] `chat-frontend-next/lib/api/users.ts` - User API
 - [ ] `chat-frontend-next/components/MessageActions.tsx`
 - [ ] `chat-frontend-next/components/EditMessageModal.tsx`
 - [ ] `chat-frontend-next/components/DeleteMessageConfirm.tsx`
@@ -613,14 +636,16 @@ const isAdmin = user?.role === 'admin';
 
 ### Implementation Progress
 - **Total Backend Endpoints:** 29
-- **Implemented in Frontend API:** 25 (86%)
-- **Not Implemented:** 4 (14% - user endpoints only)
+- **Implemented in Frontend API:** 29 (100%) ✅
+- **Not Implemented:** 0 (0%) ✅
 - **Core UI Integration:** ✅ 100% Complete (chat page fully functional)
-- **Advanced UI Features:** 30% (optional features remaining)
+- **Direct Messages UI:** ✅ 100% Complete (dedicated components)
+- **Advanced UI Features:** 35% (optional features remaining)
 
 ### Code Stats
-- **API Service Files:** 3 (auth, rooms, messages)
+- **API Service Files:** 4 (auth, rooms, messages, users)
 - **WebSocket Files:** 2 (client, hooks)
+- **UI Components:** 7 (MessageList, MessageBubble, MessageInput, DirectMessageCard, CreateDMButton, LoginForm, Dialog)
 - **Documentation Files:** 4 (574 + 750 + 680 + 710 = 2,714 lines)
 - **Lines of Code (API Layer):** ~1,500 lines
 - **Lines of Code (WebSocket):** ~835 lines
