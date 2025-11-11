@@ -23,10 +23,12 @@
 import * as auth from './auth';
 import * as rooms from './rooms';
 import * as messages from './messages';
+import * as users from './users';
 
-export { auth, rooms, messages };
+export { auth, rooms, messages, users };
 
 // Re-export for convenience
 export * from './auth';
 export * from './rooms';
 export * from './messages';
+export * from './users';

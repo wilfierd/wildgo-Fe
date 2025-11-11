@@ -11,6 +11,8 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { MessageList } from "@/components/MessageList"
 import { MessageInput } from "@/components/MessageInput"
+import { DirectMessageCard } from "@/components/DirectMessageCard"
+import { CreateDMButton } from "@/components/CreateDMButton"
 import {
   Search,
   MoreVertical,
@@ -290,6 +292,12 @@ export default function ChatPage() {
           <div className="flex items-center justify-between mb-3">
             <h1 className="text-xl font-semibold text-black">Messages</h1>
             <div className="flex items-center gap-2">
+              <CreateDMButton
+                onDMCreated={(roomId) => {
+                  setSelectedRoomId(roomId)
+                  loadRoomsAndDMs()
+                }}
+              />
               <Link href="/profile">
                 <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-gray-100">
                   <User className="h-4 w-4 text-gray-600" />
@@ -348,10 +356,23 @@ export default function ChatPage() {
           ) : (
             <div className="p-2">
               {allRooms.map((room) => {
-                const displayName = getRoomDisplayName(room)
-                const isOnline = isUserOnline(room)
-                const unreadCount = getUnreadCount(room)
                 const isSelected = selectedRoomId === room.id
+
+                // Use DirectMessageCard for DMs
+                if ('other_user' in room) {
+                  return (
+                    <DirectMessageCard
+                      key={room.id}
+                      dm={room}
+                      isSelected={isSelected}
+                      onClick={() => setSelectedRoomId(room.id)}
+                    />
+                  )
+                }
+
+                // Render group rooms with original inline style
+                const displayName = getRoomDisplayName(room)
+                const unreadCount = getUnreadCount(room)
 
                 return (
                   <div
@@ -368,18 +389,13 @@ export default function ChatPage() {
                           {getInitials(displayName)}
                         </AvatarFallback>
                       </Avatar>
-                      {isOnline && (
-                        <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 bg-black border-2 border-white rounded-full" />
-                      )}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between mb-1">
                         <h3 className="font-medium text-black truncate">{displayName}</h3>
                       </div>
                       <p className="text-sm text-gray-600 truncate">
-                        {'last_message' in room && room.last_message
-                          ? room.last_message.content
-                          : 'No messages yet'}
+                        Group chat
                       </p>
                     </div>
                     {unreadCount > 0 && (
