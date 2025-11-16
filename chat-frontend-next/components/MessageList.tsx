@@ -16,6 +16,8 @@ interface MessageListProps {
   hasMore?: boolean
   onLoadMore?: () => void
   autoScroll?: boolean
+  onEdit?: (messageId: number, newContent: string) => Promise<void>
+  onDelete?: (messageId: number) => Promise<void>
 }
 
 /**
@@ -27,6 +29,8 @@ interface MessageListProps {
  * @param hasMore - Whether there are more messages to load
  * @param onLoadMore - Callback to load more messages (pagination)
  * @param autoScroll - Whether to auto-scroll to bottom on new messages (default: true)
+ * @param onEdit - Callback when a message is edited
+ * @param onDelete - Callback when a message is deleted
  */
 export function MessageList({
   messages,
@@ -35,6 +39,8 @@ export function MessageList({
   hasMore = false,
   onLoadMore,
   autoScroll = true,
+  onEdit,
+  onDelete,
 }: MessageListProps) {
   const scrollRef = useRef<HTMLDivElement>(null)
   const lastMessageIdRef = useRef<number | null>(null)
@@ -143,6 +149,8 @@ export function MessageList({
                   message={message}
                   isOwn={isOwn}
                   showAvatar={showAvatar}
+                  onEdit={onEdit}
+                  onDelete={onDelete}
                 />
               )
             })}

@@ -255,27 +255,36 @@ The frontend has **ALL API layers complete** AND **core chat UI is fully integra
 
 ---
 
-#### Message Actions UI ❌
-**Status:** API ready, UI not created
+#### Message Actions UI ✅
+**Status:** Fully implemented with edit and delete functionality
 
-**TODO:**
-- [ ] Create `components/MessageActions.tsx`
-  - Show edit/delete buttons (only for own messages)
-  - Check ownership with `isMessageOwner(message, currentUserId)`
+**Completed Components:**
+- [x] `components/MessageActions.tsx` ✅
+  - Show edit/delete dropdown menu on hover
+  - Only visible for user's own messages
+  - Edit and delete actions
 
-- [ ] Create `components/EditMessageModal.tsx`
-  - Input field pre-filled with message content
+- [x] `components/EditMessageModal.tsx` ✅
+  - Textarea pre-filled with current message content
+  - Character counter
   - Save button calls `updateMessage(messageId, content)`
+  - Keyboard shortcuts (Ctrl+Enter to save, Escape to cancel)
+  - Loading and error states
 
-- [ ] Create `components/DeleteMessageConfirm.tsx`
+- [x] `components/DeleteMessageConfirm.tsx` ✅
+  - Warning message with alert icon
   - Confirmation dialog
   - Delete button calls `deleteMessage(messageId)`
+  - Loading and error states
 
-**API Available:**
+**Integrated Features:**
 ```typescript
-✅ updateMessage(messageId: number, content: string): Promise<Message>
-✅ deleteMessage(messageId: number): Promise<void>
-✅ isMessageOwner(message: Message, currentUserId: number): boolean
+✅ Edit own messages with full UI
+✅ Delete own messages with confirmation
+✅ Hover-activated dropdown menu
+✅ Real-time message updates in chat
+✅ "edited" indicator on modified messages
+✅ Error handling for all operations
 ```
 
 ---
@@ -425,8 +434,8 @@ const isAdmin = user?.role === 'admin';
 | **Direct Messages List** | ✅ | ✅ | ✅ | ✅ Complete |
 | **Unread Count Badges** | ✅ | ✅ | ✅ | ✅ Complete |
 | **Mark Room as Read** | ✅ | ✅ | ✅ | ✅ Complete |
-| **Edit Messages** | ✅ | ✅ | ❌ | 🟢 Low |
-| **Delete Messages** | ✅ | ✅ | ❌ | 🟢 Low |
+| **Edit Messages** | ✅ | ✅ | ✅ | ✅ Complete |
+| **Delete Messages** | ✅ | ✅ | ✅ | ✅ Complete |
 | **Thread Replies** | ✅ | ✅ | ❌ | 🟢 Low |
 | **Create Rooms (Admin)** | ✅ | ✅ | ❌ | 🟢 Low |
 | **Edit Rooms (Admin)** | ✅ | ✅ | ❌ | 🟢 Low |
@@ -507,13 +516,15 @@ const isAdmin = user?.role === 'admin';
 
 ### 🟢 Low Priority (Nice to Have)
 
-7. **Message Actions**
-   - [ ] Create `components/MessageActions.tsx`
-   - [ ] Create `components/EditMessageModal.tsx`
-   - [ ] Create `components/DeleteMessageConfirm.tsx`
-   - [ ] Show actions only for own messages
+7. **Message Actions** ✅
+   - [x] Create `components/MessageActions.tsx`
+   - [x] Create `components/EditMessageModal.tsx`
+   - [x] Create `components/DeleteMessageConfirm.tsx`
+   - [x] Show actions only for own messages
+   - [x] Integrate into MessageBubble and chat page
 
-   **Estimated Effort:** 2-3 hours
+   **Status:** ✅ Completed
+   **Location:** chat-frontend-next/components/
 
 8. **Threaded Replies**
    - [ ] Create `components/ThreadedMessage.tsx`
@@ -568,6 +579,9 @@ const isAdmin = user?.role === 'admin';
 - [x] `chat-frontend-next/components/MessageList.tsx`
 - [x] `chat-frontend-next/components/DirectMessageCard.tsx` - ✅ DM UI
 - [x] `chat-frontend-next/components/CreateDMButton.tsx` - ✅ New DM dialog
+- [x] `chat-frontend-next/components/MessageActions.tsx` - ✅ Edit/delete actions
+- [x] `chat-frontend-next/components/EditMessageModal.tsx` - ✅ Edit modal
+- [x] `chat-frontend-next/components/DeleteMessageConfirm.tsx` - ✅ Delete confirmation
 - [x] `chat-frontend-next/components/ui/dialog.tsx` - ✅ Modal component
 - [x] `docs/API_AUTH.md`
 - [x] `docs/API_ROOMS.md`
@@ -581,9 +595,6 @@ const isAdmin = user?.role === 'admin';
 - [ ] `chat-frontend-next/app/profile/[id]/page.tsx` - Other user profiles
 
 ### ❌ Not Created Yet (Optional/Advanced Features)
-- [ ] `chat-frontend-next/components/MessageActions.tsx`
-- [ ] `chat-frontend-next/components/EditMessageModal.tsx`
-- [ ] `chat-frontend-next/components/DeleteMessageConfirm.tsx`
 - [ ] `chat-frontend-next/components/ThreadedMessage.tsx`
 - [ ] `chat-frontend-next/components/TypingIndicator.tsx`
 - [ ] `chat-frontend-next/components/OnlineStatusBadge.tsx`
@@ -645,7 +656,7 @@ const isAdmin = user?.role === 'admin';
 ### Code Stats
 - **API Service Files:** 4 (auth, rooms, messages, users)
 - **WebSocket Files:** 2 (client, hooks)
-- **UI Components:** 7 (MessageList, MessageBubble, MessageInput, DirectMessageCard, CreateDMButton, LoginForm, Dialog)
+- **UI Components:** 10 (MessageList, MessageBubble, MessageInput, MessageActions, EditMessageModal, DeleteMessageConfirm, DirectMessageCard, CreateDMButton, LoginForm, Dialog)
 - **Documentation Files:** 4 (574 + 750 + 680 + 710 = 2,714 lines)
 - **Lines of Code (API Layer):** ~1,500 lines
 - **Lines of Code (WebSocket):** ~835 lines

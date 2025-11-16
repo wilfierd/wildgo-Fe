@@ -27,7 +27,7 @@ import { cn } from "@/lib/utils"
 import Link from "next/link"
 import type { Room, Message, DirectRoomResponse } from "@/lib/types"
 import { getRooms, getDirectRooms, markRoomAsRead } from "@/lib/api/rooms"
-import { getMessages, sendMessage } from "@/lib/api/messages"
+import { getMessages, sendMessage, updateMessage, deleteMessage } from "@/lib/api/messages"
 
 export default function ChatPage() {
   const { isAuthenticated, loading: authLoading, user } = useAuth()
@@ -200,6 +200,34 @@ export default function ChatPage() {
     },
     [selectedRoomId, sendTyping]
   )
+
+  // Edit message
+  const handleEditMessage = async (messageId: number, newContent: string) => {
+    try {
+      const updatedMessage = await updateMessage(messageId, newContent)
+
+      // Update message in the local state
+      setMessages((prev) =>
+        prev.map((msg) => (msg.id === messageId ? updatedMessage : msg))
+      )
+    } catch (err) {
+      console.error('Failed to edit message:', err)
+      throw err // Re-throw so component can handle it
+    }
+  }
+
+  // Delete message
+  const handleDeleteMessage = async (messageId: number) => {
+    try {
+      await deleteMessage(messageId)
+
+      // Remove message from local state
+      setMessages((prev) => prev.filter((msg) => msg.id !== messageId))
+    } catch (err) {
+      console.error('Failed to delete message:', err)
+      throw err // Re-throw so component can handle it
+    }
+  }
 
   // Load more messages (pagination)
   const handleLoadMore = () => {
@@ -455,6 +483,8 @@ export default function ChatPage() {
               loading={loadingMessages}
               hasMore={hasMoreMessages}
               onLoadMore={handleLoadMore}
+              onEdit={handleEditMessage}
+              onDelete={handleDeleteMessage}
             />
 
             {/* Message Input */}

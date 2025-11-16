@@ -5,11 +5,14 @@ import { cn } from "@/lib/utils"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import type { Message } from "@/lib/types"
 import { formatMessageTime } from "@/lib/api/messages"
+import { MessageActions } from "@/components/MessageActions"
 
 interface MessageBubbleProps {
   message: Message
   isOwn: boolean
   showAvatar?: boolean
+  onEdit?: (messageId: number, newContent: string) => Promise<void>
+  onDelete?: (messageId: number) => Promise<void>
 }
 
 /**
@@ -18,8 +21,10 @@ interface MessageBubbleProps {
  * @param message - The message object from the API
  * @param isOwn - Whether the message belongs to the current user
  * @param showAvatar - Whether to show the avatar (useful for grouping)
+ * @param onEdit - Callback when message is edited
+ * @param onDelete - Callback when message is deleted
  */
-export function MessageBubble({ message, isOwn, showAvatar = true }: MessageBubbleProps) {
+export function MessageBubble({ message, isOwn, showAvatar = true, onEdit, onDelete }: MessageBubbleProps) {
   // Get user initials for avatar
   const getInitials = (username: string) => {
     return username
@@ -66,30 +71,42 @@ export function MessageBubble({ message, isOwn, showAvatar = true }: MessageBubb
           </div>
         )}
 
-        {/* Message bubble */}
-        <div
-          className={cn(
-            "px-4 py-2 rounded-2xl transition-all duration-200",
-            isOwn
-              ? "bg-black text-white"
-              : "bg-white text-black border border-gray-200",
-          )}
-        >
-          <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
-          <div className={cn(
-            "flex items-center gap-2 mt-1",
-            isOwn && "justify-end"
-          )}>
-            <p className={cn("text-xs", isOwn ? "text-gray-300" : "text-gray-500")}>
-              {formatMessageTime(message.created_at)}
-            </p>
-            {/* Show edited indicator if message was edited */}
-            {message.updated_at !== message.created_at && (
-              <span className={cn("text-xs italic", isOwn ? "text-gray-400" : "text-gray-400")}>
-                edited
-              </span>
+        {/* Message bubble with actions */}
+        <div className="group relative flex items-start gap-2">
+          <div
+            className={cn(
+              "px-4 py-2 rounded-2xl transition-all duration-200 flex-1",
+              isOwn
+                ? "bg-black text-white"
+                : "bg-white text-black border border-gray-200",
             )}
+          >
+            <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
+            <div className={cn(
+              "flex items-center gap-2 mt-1",
+              isOwn && "justify-end"
+            )}>
+              <p className={cn("text-xs", isOwn ? "text-gray-300" : "text-gray-500")}>
+                {formatMessageTime(message.created_at)}
+              </p>
+              {/* Show edited indicator if message was edited */}
+              {message.updated_at !== message.created_at && (
+                <span className={cn("text-xs italic", isOwn ? "text-gray-400" : "text-gray-400")}>
+                  edited
+                </span>
+              )}
+            </div>
           </div>
+
+          {/* Message actions (edit/delete) */}
+          {isOwn && (
+            <MessageActions
+              message={message}
+              isOwn={isOwn}
+              onEdit={onEdit}
+              onDelete={onDelete}
+            />
+          )}
         </div>
       </div>
     </div>
