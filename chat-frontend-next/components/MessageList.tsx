@@ -18,6 +18,7 @@ interface MessageListProps {
   autoScroll?: boolean
   onEdit?: (messageId: number, newContent: string) => Promise<void>
   onDelete?: (messageId: number) => Promise<void>
+  onReply?: (message: Message) => void
 }
 
 /**
@@ -31,6 +32,7 @@ interface MessageListProps {
  * @param autoScroll - Whether to auto-scroll to bottom on new messages (default: true)
  * @param onEdit - Callback when a message is edited
  * @param onDelete - Callback when a message is deleted
+ * @param onReply - Callback when user wants to reply to a message
  */
 export function MessageList({
   messages,
@@ -41,6 +43,7 @@ export function MessageList({
   autoScroll = true,
   onEdit,
   onDelete,
+  onReply,
 }: MessageListProps) {
   const scrollRef = useRef<HTMLDivElement>(null)
   const lastMessageIdRef = useRef<number | null>(null)
@@ -151,6 +154,7 @@ export function MessageList({
                   showAvatar={showAvatar}
                   onEdit={onEdit}
                   onDelete={onDelete}
+                  onReply={onReply}
                 />
               )
             })}
