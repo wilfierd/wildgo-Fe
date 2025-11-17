@@ -1,6 +1,6 @@
 # TODO: Frontend-Backend Integration Progress
 
-**Last Updated:** 2025-01-09
+**Last Updated:** 2025-01-17
 **Frontend Repository:** [wildgo-Fe](https://github.com/wilfierd/wildgo-Fe)
 **Backend Repository:** [windgo-chat](https://github.com/wilfierd/windgo-chat)
 
@@ -256,13 +256,14 @@ The frontend has **ALL API layers complete** AND **core chat UI is fully integra
 ---
 
 #### Message Actions UI ✅
-**Status:** Fully implemented with edit and delete functionality
+**Status:** Fully implemented with edit, delete, and reply functionality
 
 **Completed Components:**
 - [x] `components/MessageActions.tsx` ✅
-  - Show edit/delete dropdown menu on hover
-  - Only visible for user's own messages
-  - Edit and delete actions
+  - Show edit/delete/reply dropdown menu on hover
+  - **Reply option available for ALL messages** (PR #5)
+  - Edit and delete actions only for user's own messages
+  - Now shows for all messages (not just own messages)
 
 - [x] `components/EditMessageModal.tsx` ✅
   - Textarea pre-filled with current message content
@@ -281,6 +282,7 @@ The frontend has **ALL API layers complete** AND **core chat UI is fully integra
 ```typescript
 ✅ Edit own messages with full UI
 ✅ Delete own messages with confirmation
+✅ Reply to any message with threaded replies (PR #5)
 ✅ Hover-activated dropdown menu
 ✅ Real-time message updates in chat
 ✅ "edited" indicator on modified messages
@@ -289,14 +291,23 @@ The frontend has **ALL API layers complete** AND **core chat UI is fully integra
 
 ---
 
-#### Threaded Replies UI ❌
-**Status:** API supports it, UI not created
+#### Threaded Replies UI ✅
+**Status:** ✅ Complete - Fully implemented in PR #5
 
-**TODO:**
-- [ ] Create `components/ThreadedMessage.tsx`
-  - Show parent message preview
-  - Reply button
-  - Send reply with `parent_id`
+**Completed:**
+- [x] Added Reply button to `components/MessageActions.tsx`
+  - Reply option available for all messages
+  - Shows in dropdown menu
+- [x] Updated `components/MessageBubble.tsx`
+  - Shows parent message preview for threaded replies
+  - Displays parent username and content
+- [x] Enhanced `components/MessageInput.tsx`
+  - Reply preview shows parent message
+  - Cancel button (X) to exit reply mode
+  - Sends messages with `parent_id`
+- [x] Updated `app/chat/page.tsx`
+  - Reply state management (replyTo, handleReply, handleCancelReply)
+  - Passes reply handlers to MessageList and MessageInput
 
 **API Available:**
 ```typescript
@@ -306,14 +317,24 @@ The frontend has **ALL API layers complete** AND **core chat UI is fully integra
 
 ---
 
-#### Unread Tracking UI ❌
-**Status:** API ready, UI not using it
+#### Unread Tracking UI ✅
+**Status:** ✅ Complete - Already working in chat page
 
-**TODO:**
-- [ ] Update `components/RoomList.tsx` to show unread badges
-- [ ] Update `components/DirectMessageCard.tsx` to show unread counts
-- [ ] Call `markRoomAsRead(roomId)` when opening a room
-- [ ] Update unread counts via WebSocket real-time
+**Completed:**
+- [x] `components/DirectMessageCard.tsx` shows unread counts
+  - Unread badge displays count (lines 100-104)
+  - Shows "99+" for counts over 99
+  - Black badge with white text
+- [x] `app/chat/page.tsx` shows unread badges for group rooms
+  - Unread count badges on room cards (lines 429-433)
+  - Same styling as DM cards
+- [x] `markRoomAsRead(roomId)` automatically called
+  - When opening a room (line 74)
+  - When new messages arrive in current room (line 91)
+  - Updates local state to reset unread count (lines 156-173)
+- [x] Real-time unread count updates via WebSocket
+  - New messages trigger unread updates
+  - Counts update immediately in UI
 
 **API Available:**
 ```typescript
@@ -324,13 +345,21 @@ The frontend has **ALL API layers complete** AND **core chat UI is fully integra
 
 ---
 
-#### Typing Indicators UI ❌
-**Status:** WebSocket hook ready, UI not created
+#### Typing Indicators UI ✅
+**Status:** ✅ Complete - Fully implemented in PR #5
 
-**TODO:**
-- [ ] Create `components/TypingIndicator.tsx`
-  - Use `useTypingIndicator(roomId)` hook
-  - Display "X users typing..."
+**Completed:**
+- [x] Created `components/TypingIndicator.tsx` (57 lines)
+  - Uses `useTypingIndicator(roomId)` hook
+  - Shows "Someone is typing" for 1 user
+  - Shows "2 people are typing" for 2 users
+  - Shows "X people are typing" for 3+ users
+  - Animated bouncing dots for visual feedback
+  - Auto-hides when no one is typing
+- [x] Integrated into `app/chat/page.tsx`
+  - Placed between MessageList and MessageInput (line 508)
+  - Monitors typing activity in selected room
+  - Real-time updates via WebSocket
 
 **Hook Available:**
 ```typescript
