@@ -13,6 +13,7 @@ import { MessageList } from "@/components/MessageList"
 import { MessageInput } from "@/components/MessageInput"
 import { DirectMessageCard } from "@/components/DirectMessageCard"
 import { CreateDMButton } from "@/components/CreateDMButton"
+import { TypingIndicator } from "@/components/TypingIndicator"
 import {
   Search,
   MoreVertical,
@@ -44,6 +45,7 @@ export default function ChatPage() {
   const [currentPage, setCurrentPage] = useState(1)
   const [hasMoreMessages, setHasMoreMessages] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
+  const [replyTo, setReplyTo] = useState<Message | null>(null)
 
   // WebSocket integration
   const {
@@ -172,24 +174,38 @@ export default function ChatPage() {
     }
   }, [])
 
-  // Send message
-  const handleSendMessage = async (content: string) => {
+  // Send message (with optional parent_id for threaded replies)
+  const handleSendMessage = async (content: string, parentId?: number) => {
     if (!selectedRoomId) return
 
     try {
       const newMessage = await sendMessage({
         room_id: selectedRoomId,
         content,
+        parent_id: parentId,
       })
 
       // Message will be added via WebSocket broadcast
       // But add it optimistically for immediate feedback
       setMessages((prev) => [...prev, newMessage])
+
+      // Clear reply state after sending
+      setReplyTo(null)
     } catch (err) {
       console.error('Failed to send message:', err)
       throw err // Re-throw so MessageInput can handle it
     }
   }
+
+  // Handle reply to message
+  const handleReply = useCallback((message: Message) => {
+    setReplyTo(message)
+  }, [])
+
+  // Cancel reply
+  const handleCancelReply = useCallback(() => {
+    setReplyTo(null)
+  }, [])
 
   // Handle typing indicator
   const handleTypingChange = useCallback(
@@ -485,13 +501,19 @@ export default function ChatPage() {
               onLoadMore={handleLoadMore}
               onEdit={handleEditMessage}
               onDelete={handleDeleteMessage}
+              onReply={handleReply}
             />
+
+            {/* Typing Indicator */}
+            <TypingIndicator roomId={selectedRoomId} />
 
             {/* Message Input */}
             <MessageInput
               onSend={handleSendMessage}
               onTypingChange={handleTypingChange}
               disabled={!isConnected}
+              replyTo={replyTo}
+              onCancelReply={handleCancelReply}
             />
           </>
         ) : (

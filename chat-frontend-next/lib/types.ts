@@ -15,6 +15,8 @@ export interface Message {
   user_id: number;
   user: User;
   room_id: number;
+  parent_id?: number;
+  parent_message?: Message;
   created_at: string;
   updated_at: string;
 }

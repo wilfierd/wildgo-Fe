@@ -4,29 +4,36 @@ import type React from "react"
 import { useState, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Send, Smile, Loader2 } from "lucide-react"
+import { Send, Smile, Loader2, X } from "lucide-react"
 import { cn } from "@/lib/utils"
+import type { Message } from "@/lib/types"
 
 interface MessageInputProps {
-  onSend: (content: string) => Promise<void> | void
+  onSend: (content: string, parentId?: number) => Promise<void> | void
   placeholder?: string
   disabled?: boolean
   onTypingChange?: (isTyping: boolean) => void
+  replyTo?: Message | null
+  onCancelReply?: () => void
 }
 
 /**
  * MessageInput component for sending messages
  *
- * @param onSend - Callback when user sends a message
+ * @param onSend - Callback when user sends a message (content, optional parentId)
  * @param placeholder - Input placeholder text
  * @param disabled - Whether input is disabled
  * @param onTypingChange - Callback when typing state changes (for typing indicators)
+ * @param replyTo - Message being replied to (for threaded replies)
+ * @param onCancelReply - Callback to cancel reply mode
  */
 export function MessageInput({
   onSend,
   placeholder = "Type a message...",
   disabled = false,
   onTypingChange,
+  replyTo = null,
+  onCancelReply,
 }: MessageInputProps) {
   const [message, setMessage] = useState("")
   const [sending, setSending] = useState(false)
@@ -77,11 +84,14 @@ export function MessageInput({
         clearTimeout(typingTimeout)
       }
 
-      // Send message
-      await onSend(trimmedMessage)
+      // Send message with optional parent_id for threaded replies
+      await onSend(trimmedMessage, replyTo?.id)
 
-      // Clear input
+      // Clear input and reply state
       setMessage("")
+      if (onCancelReply) {
+        onCancelReply()
+      }
     } catch (error) {
       console.error("Failed to send message:", error)
       // Keep the message in the input so user can retry
@@ -100,6 +110,29 @@ export function MessageInput({
 
   return (
     <div className="p-4 border-t border-gray-200 bg-white">
+      {/* Reply preview */}
+      {replyTo && (
+        <div className="mb-2 flex items-start gap-2 p-2 bg-gray-50 rounded-lg border border-gray-200">
+          <div className="flex-1 min-w-0">
+            <p className="text-xs text-gray-500 font-medium mb-0.5">
+              Replying to {replyTo.user?.username || 'User'}
+            </p>
+            <p className="text-sm text-gray-700 truncate">{replyTo.content}</p>
+          </div>
+          {onCancelReply && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onCancelReply}
+              className="h-6 w-6 p-0 hover:bg-gray-200 flex-shrink-0"
+              type="button"
+            >
+              <X className="h-3.5 w-3.5 text-gray-500" />
+            </Button>
+          )}
+        </div>
+      )}
+
       <div className="flex items-center gap-2">
         {/* Emoji button (placeholder for future emoji picker) */}
         <Button

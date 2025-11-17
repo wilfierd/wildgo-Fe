@@ -13,6 +13,7 @@ interface MessageBubbleProps {
   showAvatar?: boolean
   onEdit?: (messageId: number, newContent: string) => Promise<void>
   onDelete?: (messageId: number) => Promise<void>
+  onReply?: (message: Message) => void
 }
 
 /**
@@ -23,8 +24,9 @@ interface MessageBubbleProps {
  * @param showAvatar - Whether to show the avatar (useful for grouping)
  * @param onEdit - Callback when message is edited
  * @param onDelete - Callback when message is deleted
+ * @param onReply - Callback when user wants to reply to message
  */
-export function MessageBubble({ message, isOwn, showAvatar = true, onEdit, onDelete }: MessageBubbleProps) {
+export function MessageBubble({ message, isOwn, showAvatar = true, onEdit, onDelete, onReply }: MessageBubbleProps) {
   // Get user initials for avatar
   const getInitials = (username: string) => {
     return username
@@ -98,15 +100,14 @@ export function MessageBubble({ message, isOwn, showAvatar = true, onEdit, onDel
             </div>
           </div>
 
-          {/* Message actions (edit/delete) */}
-          {isOwn && (
-            <MessageActions
-              message={message}
-              isOwn={isOwn}
-              onEdit={onEdit}
-              onDelete={onDelete}
-            />
-          )}
+          {/* Message actions (edit/delete/reply) */}
+          <MessageActions
+            message={message}
+            isOwn={isOwn}
+            onEdit={onEdit}
+            onDelete={onDelete}
+            onReply={onReply}
+          />
         </div>
       </div>
     </div>

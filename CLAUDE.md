@@ -2,7 +2,7 @@
 
 This document tracks the implementation progress of the Next.js frontend integration with the Go backend, following the plan outlined in `FRONTEND_BACKEND_INTEGRATION_PLAN.md`.
 
-**Last Updated:** 2025-01-09
+**Last Updated:** 2025-01-17
 **Repository:** [wildgo-Fe](https://github.com/wilfierd/wildgo-Fe)
 **Backend Repository:** [windgo-chat](https://github.com/wilfierd/windgo-chat)
 
@@ -13,10 +13,10 @@ This document tracks the implementation progress of the Next.js frontend integra
 | Phase | Status | Progress |
 |-------|--------|----------|
 | **Phase 1: Core Chat Functionality** | ✅ Complete | 100% (4/4) |
-| **Phase 2: Advanced Features** | ⏳ Pending | 0% (0/6) |
+| **Phase 2: Advanced Features** | ⏳ In Progress | 50% (3/6) |
 | **Phase 3: Polish & Extras** | ⏳ Pending | 0% (0/2) |
 
-**Total Progress:** 33% (4/12 steps completed)
+**Total Progress:** 58% (7/12 steps completed)
 
 ---
 
@@ -110,7 +110,40 @@ This document tracks the implementation progress of the Next.js frontend integra
 
 ---
 
-## ⏳ Phase 2: Advanced Features (PENDING)
+### PR #5: Messaging UI Features ✅
+**Branch:** `claude/messaging-ui-features-01VeEZ2n7NFW8KocdvyKNwiw`
+**Status:** ✅ Pushed & Ready for Review
+**PR Link:** https://github.com/wilfierd/wildgo-Fe/pull/new/claude/messaging-ui-features-01VeEZ2n7NFW8KocdvyKNwiw
+
+**Implemented:**
+- ✅ **Threaded Replies UI**:
+  - Reply button in MessageActions (available for all messages)
+  - Parent message preview in MessageBubble
+  - Reply input UI with parent message preview and cancel button
+  - Messages sent with `parent_id` for proper threading
+- ✅ **Unread Tracking UI** (Already Working):
+  - Unread badges on DirectMessageCard and group rooms
+  - `markRoomAsRead()` automatically called when opening rooms
+  - Real-time unread count updates via WebSocket
+- ✅ **Typing Indicators UI**:
+  - New TypingIndicator component using `useTypingIndicator` hook
+  - Shows "X users typing..." with animated dots
+  - Integrated between MessageList and MessageInput
+
+**Components Updated:**
+- `lib/types.ts` - Added `parent_id` and `parent_message` to Message
+- `components/MessageActions.tsx` - Added Reply button
+- `components/MessageBubble.tsx` - Updated to show MessageActions for all messages
+- `components/MessageList.tsx` - Added `onReply` prop
+- `components/MessageInput.tsx` - Added reply preview UI
+- `app/chat/page.tsx` - Added reply state management
+- `components/TypingIndicator.tsx` - New component (57 lines)
+
+**Total:** 7 files changed, 202 insertions(+), 61 deletions(-)
+
+---
+
+## ⏳ Phase 2: Advanced Features (IN PROGRESS)
 
 ### Step 5: Direct Messages UI ❌
 **Status:** Not Started
@@ -131,39 +164,39 @@ This document tracks the implementation progress of the Next.js frontend integra
 
 ---
 
-### Step 6: Unread Tracking ❌
-**Status:** Not Started
+### Step 6: Unread Tracking ✅
+**Status:** ✅ Complete (Implemented in PR #5)
 **Dependencies:** PR #2
 
-**Todo:**
-- [ ] Display unread counts from API
-- [ ] Implement `markRoomAsRead()` when opening room
-- [ ] Update unread counts in real-time via WebSocket
-- [ ] Add unread badges to room/DM lists
-- [ ] Highlight unread rooms
+**Implemented:**
+- [x] Display unread counts from API
+- [x] Implement `markRoomAsRead()` when opening room
+- [x] Update unread counts in real-time via WebSocket
+- [x] Add unread badges to room/DM lists
+- [x] Highlight unread rooms
 
-**Files to Update:**
-- `app/chat/page.tsx` - Add unread badges
-- `components/RoomList.tsx` - Show unread counts
-- `components/DirectMessageCard.tsx` - Unread indicators
+**Files Updated:**
+- `app/chat/page.tsx` - Unread badges and `markRoomAsRead()` implementation
+- `components/DirectMessageCard.tsx` - Unread count badges (lines 100-104)
 
 ---
 
-### Step 7: Message Actions ❌
-**Status:** Not Started
+### Step 7: Message Actions ✅
+**Status:** ✅ Complete (Edit/Delete already in PR #9, Reply in PR #5)
 **Dependencies:** PR #3
 
-**Todo:**
-- [ ] Implement edit message UI
-- [ ] Implement delete message UI
-- [ ] Implement reply to message (thread support)
-- [ ] Show edit/delete options (only for own messages)
-- [ ] Add confirmation for delete
+**Implemented:**
+- [x] Implement edit message UI (Already implemented)
+- [x] Implement delete message UI (Already implemented)
+- [x] Implement reply to message (thread support) - **PR #5**
+- [x] Show edit/delete options (only for own messages)
+- [x] Add confirmation for delete
 
-**Files to Create:**
-- `components/MessageActions.tsx`
-- `components/EditMessageDialog.tsx`
-- `components/ThreadedMessage.tsx`
+**Files Created/Updated:**
+- `components/MessageActions.tsx` - ✅ Updated with Reply button
+- `components/EditMessageModal.tsx` - ✅ Already exists
+- `components/DeleteMessageConfirm.tsx` - ✅ Already exists
+- `components/MessageBubble.tsx` - ✅ Shows parent message preview for threads
 
 ---
 
@@ -188,21 +221,21 @@ This document tracks the implementation progress of the Next.js frontend integra
 
 ## ⏳ Phase 3: Polish & Extras (PENDING)
 
-### Step 9: User Features ❌
-**Status:** Not Started
+### Step 9: User Features ⏳
+**Status:** Partially Complete (Typing Indicators done in PR #5)
 **Dependencies:** Backend `/api/v1/users` endpoint
 
 **Todo:**
 - [ ] User search/directory
 - [ ] View user profiles
 - [ ] Online status indicators
-- [ ] Typing indicators UI
+- [x] Typing indicators UI - ✅ **Completed in PR #5**
 
-**Files to Create:**
-- `components/UserSearch.tsx`
-- `components/UserProfile.tsx`
-- `components/OnlineStatus.tsx`
-- `components/TypingIndicator.tsx`
+**Files Created/To Create:**
+- `components/UserSearch.tsx` - ❌ Not created yet
+- `components/UserProfile.tsx` - ❌ Not created yet
+- `components/OnlineStatus.tsx` - ❌ Not created yet
+- `components/TypingIndicator.tsx` - ✅ **Created in PR #5**
 
 ---
 
@@ -242,14 +275,15 @@ chat-frontend-next/
 │   └── useWebSocket.ts        ✅ WebSocket hooks
 ├── components/
 │   ├── LoginForm.tsx          ✅ Login form (updated)
-│   ├── DirectMessageList.tsx  ❌ Not created yet
-│   ├── DirectMessageCard.tsx  ❌ Not created yet
-│   ├── RoomList.tsx           ❌ Not created yet
-│   ├── MessageActions.tsx     ❌ Not created yet
-│   ├── ThreadedMessage.tsx    ❌ Not created yet
+│   ├── DirectMessageCard.tsx  ✅ DM card with unread counts (PR #8)
+│   ├── MessageActions.tsx     ✅ Edit/Delete/Reply actions (PR #9, #5)
+│   ├── MessageBubble.tsx      ✅ Message display with threading (PR #5)
+│   ├── MessageInput.tsx       ✅ Input with reply preview (PR #5)
+│   ├── MessageList.tsx        ✅ Message list component
+│   ├── TypingIndicator.tsx    ✅ Typing indicator (PR #5)
 │   └── ...                    (other components)
 ├── app/
-│   ├── chat/page.tsx          ⚠️  Needs update (using mock data)
+│   ├── chat/page.tsx          ✅ Real-time chat with API/WebSocket (PR #8, #5)
 │   ├── login/page.tsx         ✅ Working
 │   ├── profile/page.tsx       ⚠️  Needs update
 │   └── ...
@@ -264,44 +298,49 @@ chat-frontend-next/
 
 ## 🎯 Next Steps (Priority Order)
 
+### ✅ Completed
+1. ✅ **Update Chat Page UI** - Real API calls implemented (PR #8)
+   - ✅ Use `getRooms()` to fetch rooms
+   - ✅ Use `getDirectRooms()` to fetch DMs
+   - ✅ Use `getMessages()` to fetch messages
+   - ✅ Implement WebSocket for real-time updates
+
+2. ✅ **Implement Unread Tracking** (PR #5, #8)
+   - ✅ Show unread counts from room data
+   - ✅ Call `markRoomAsRead()` when opening room
+   - ✅ Update UI when new messages arrive
+
+3. ✅ **Add Message Actions** (PR #9, #5)
+   - ✅ Edit/delete buttons for own messages
+   - ✅ Threaded reply support
+   - ✅ Confirmation dialogs
+
+4. ✅ **Typing Indicators** (PR #5)
+   - ✅ TypingIndicator component
+   - ✅ Real-time typing status
+
 ### High Priority
-1. **Update Chat Page UI** - Replace mock data with real API calls
-   - Use `getRooms()` to fetch rooms
-   - Use `getDirectRooms()` to fetch DMs
-   - Use `getMessages()` to fetch messages
-   - Implement WebSocket for real-time updates
+5. **Direct Messages UI** (Partially Complete)
+   - ✅ List all DMs (PR #8)
+   - ✅ Create new DM (PR #8)
+   - ✅ Online status (PR #8)
+   - ✅ Last message preview (PR #8)
+   - [ ] Improve UI/UX
 
-2. **Implement Unread Tracking**
-   - Show unread counts from room data
-   - Call `markRoomAsRead()` when opening room
-   - Update UI when new messages arrive
-
-3. **Add Message Actions**
-   - Edit/delete buttons for own messages
-   - Threaded reply support
-   - Confirmation dialogs
+6. **Room Management (Admin)**
+   - [ ] Create/edit/delete rooms UI
+   - [ ] Invite/remove users UI
+   - [ ] Admin-only controls
 
 ### Medium Priority
-4. **Direct Messages UI**
-   - List all DMs
-   - Create new DM
-   - Online status
-   - Last message preview
+7. **User Features**
+   - [ ] User search
+   - [ ] User profiles
+   - [ ] Online status (partially done)
 
-5. **Room Management (Admin)**
-   - Create/edit/delete rooms
-   - Invite/remove users
-   - Admin-only controls
-
-### Low Priority
-6. **User Features**
-   - User search
-   - User profiles
-   - Online status
-
-7. **GitHub OAuth UI**
-   - Device flow UI
-   - Login button
+8. **GitHub OAuth UI**
+   - [ ] Device flow UI
+   - [ ] Login button
 
 ---
 
