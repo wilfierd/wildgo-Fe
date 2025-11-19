@@ -14,6 +14,10 @@ import { MessageInput } from "@/components/MessageInput"
 import { DirectMessageCard } from "@/components/DirectMessageCard"
 import { CreateDMButton } from "@/components/CreateDMButton"
 import { TypingIndicator } from "@/components/TypingIndicator"
+import { CreateRoomDialog } from "@/components/CreateRoomDialog"
+import { EditRoomDialog } from "@/components/EditRoomDialog"
+import { DeleteRoomConfirm } from "@/components/DeleteRoomConfirm"
+import { RoomMembersManager } from "@/components/RoomMembersManager"
 import {
   Search,
   MoreVertical,
@@ -23,10 +27,15 @@ import {
   User,
   Loader2,
   AlertCircle,
+  Plus,
+  Edit,
+  Trash2,
+  Users,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import Link from "next/link"
-import type { Room, Message, DirectRoomResponse } from "@/lib/types"
+import type { Message } from "@/lib/types"
+import type { Room, DirectRoomResponse } from "@/lib/api/rooms"
 import { getRooms, getDirectRooms, markRoomAsRead } from "@/lib/api/rooms"
 import { getMessages, sendMessage, updateMessage, deleteMessage } from "@/lib/api/messages"
 
@@ -46,6 +55,19 @@ export default function ChatPage() {
   const [hasMoreMessages, setHasMoreMessages] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const [replyTo, setReplyTo] = useState<Message | null>(null)
+
+  // Room management dialogs (admin only)
+  const [createRoomOpen, setCreateRoomOpen] = useState(false)
+  const [editRoomOpen, setEditRoomOpen] = useState(false)
+  const [deleteRoomOpen, setDeleteRoomOpen] = useState(false)
+  const [manageMembersOpen, setManageMembersOpen] = useState(false)
+  const [roomToEdit, setRoomToEdit] = useState<Room | null>(null)
+  const [roomToDelete, setRoomToDelete] = useState<Room | null>(null)
+  const [roomToManage, setRoomToManage] = useState<Room | null>(null)
+  const [showRoomMenu, setShowRoomMenu] = useState(false)
+
+  // Check if user is admin
+  const isAdmin = user?.role === 'admin'
 
   // WebSocket integration
   const {
@@ -300,6 +322,45 @@ export default function ChatPage() {
     return 0
   }
 
+  // Room management handlers (admin only)
+  const handleRoomCreated = (newRoom: Room) => {
+    setRooms((prev) => [...prev, newRoom])
+    setSelectedRoomId(newRoom.id)
+  }
+
+  const handleRoomUpdated = (updatedRoom: Room) => {
+    setRooms((prev) =>
+      prev.map((room) => (room.id === updatedRoom.id ? updatedRoom : room))
+    )
+    setRoomToEdit(null)
+  }
+
+  const handleRoomDeleted = (roomId: number) => {
+    setRooms((prev) => prev.filter((room) => room.id !== roomId))
+    if (selectedRoomId === roomId) {
+      setSelectedRoomId(null)
+    }
+    setRoomToDelete(null)
+  }
+
+  const handleEditRoom = (room: Room) => {
+    setRoomToEdit(room)
+    setEditRoomOpen(true)
+    setShowRoomMenu(false)
+  }
+
+  const handleDeleteRoom = (room: Room) => {
+    setRoomToDelete(room)
+    setDeleteRoomOpen(true)
+    setShowRoomMenu(false)
+  }
+
+  const handleManageMembers = (room: Room) => {
+    setRoomToManage(room)
+    setManageMembersOpen(true)
+    setShowRoomMenu(false)
+  }
+
   // Filter combined rooms based on search
   const getAllRooms = (): Array<Room | DirectRoomResponse> => {
     const combined = [...directRooms, ...rooms]
@@ -342,6 +403,17 @@ export default function ChatPage() {
                   loadRoomsAndDMs()
                 }}
               />
+              {isAdmin && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 w-8 p-0 hover:bg-gray-100"
+                  onClick={() => setCreateRoomOpen(true)}
+                  title="Create Room (Admin)"
+                >
+                  <Plus className="h-4 w-4 text-gray-600" />
+                </Button>
+              )}
               <Link href="/profile">
                 <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-gray-100">
                   <User className="h-4 w-4 text-gray-600" />
@@ -486,9 +558,63 @@ export default function ChatPage() {
                 <Button variant="ghost" size="sm" className="h-9 w-9 p-0 hover:bg-gray-100">
                   <Video className="h-4 w-4 text-gray-600" />
                 </Button>
-                <Button variant="ghost" size="sm" className="h-9 w-9 p-0 hover:bg-gray-100">
-                  <MoreVertical className="h-4 w-4 text-gray-600" />
-                </Button>
+
+                {/* Room Management Menu (Admin only, Group rooms only) */}
+                {isAdmin && selectedRoom && !('other_user' in selectedRoom) && (
+                  <div className="relative">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-9 w-9 p-0 hover:bg-gray-100"
+                      onClick={() => setShowRoomMenu(!showRoomMenu)}
+                    >
+                      <MoreVertical className="h-4 w-4 text-gray-600" />
+                    </Button>
+
+                    {showRoomMenu && (
+                      <>
+                        {/* Backdrop to close menu */}
+                        <div
+                          className="fixed inset-0 z-10"
+                          onClick={() => setShowRoomMenu(false)}
+                        />
+
+                        {/* Dropdown menu */}
+                        <div className="absolute right-0 top-full mt-1 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-20 py-1">
+                          <button
+                            onClick={() => handleManageMembers(selectedRoom as Room)}
+                            className="w-full px-4 py-2 text-sm text-left hover:bg-gray-50 flex items-center gap-2"
+                          >
+                            <Users className="h-4 w-4 text-gray-600" />
+                            Manage Members
+                          </button>
+                          <button
+                            onClick={() => handleEditRoom(selectedRoom as Room)}
+                            className="w-full px-4 py-2 text-sm text-left hover:bg-gray-50 flex items-center gap-2"
+                          >
+                            <Edit className="h-4 w-4 text-gray-600" />
+                            Edit Room
+                          </button>
+                          <div className="border-t border-gray-200 my-1" />
+                          <button
+                            onClick={() => handleDeleteRoom(selectedRoom as Room)}
+                            className="w-full px-4 py-2 text-sm text-left hover:bg-red-50 flex items-center gap-2 text-red-600"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                            Delete Room
+                          </button>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                )}
+
+                {/* Default menu for non-admin or DMs */}
+                {!(isAdmin && selectedRoom && !('other_user' in selectedRoom)) && (
+                  <Button variant="ghost" size="sm" className="h-9 w-9 p-0 hover:bg-gray-100">
+                    <MoreVertical className="h-4 w-4 text-gray-600" />
+                  </Button>
+                )}
               </div>
             </div>
 
@@ -540,6 +666,44 @@ export default function ChatPage() {
           </div>
         )}
       </div>
+
+      {/* Room Management Dialogs (Admin only) */}
+      {isAdmin && (
+        <>
+          <CreateRoomDialog
+            open={createRoomOpen}
+            onOpenChange={setCreateRoomOpen}
+            onRoomCreated={handleRoomCreated}
+          />
+
+          {roomToEdit && (
+            <EditRoomDialog
+              room={roomToEdit}
+              open={editRoomOpen}
+              onOpenChange={setEditRoomOpen}
+              onRoomUpdated={handleRoomUpdated}
+            />
+          )}
+
+          {roomToDelete && (
+            <DeleteRoomConfirm
+              room={roomToDelete}
+              open={deleteRoomOpen}
+              onOpenChange={setDeleteRoomOpen}
+              onRoomDeleted={handleRoomDeleted}
+            />
+          )}
+
+          {roomToManage && user && (
+            <RoomMembersManager
+              room={roomToManage}
+              currentUserId={user.id}
+              open={manageMembersOpen}
+              onOpenChange={setManageMembersOpen}
+            />
+          )}
+        </>
+      )}
     </div>
   )
 }
