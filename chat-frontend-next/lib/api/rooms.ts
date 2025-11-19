@@ -277,6 +277,58 @@ export async function removeUserFromRoom(roomId: number, userId: number): Promis
 }
 
 /**
+ * Update a room member's role
+ * Requires admin/owner role
+ * Cannot change owner role
+ *
+ * @param roomId - Room ID
+ * @param userId - User ID whose role to update
+ * @param role - New role ('member' or 'admin')
+ * @returns Promise with updated membership
+ *
+ * @example
+ * ```ts
+ * await updateRoomMemberRole(1, 5, 'admin');
+ * console.log('User promoted to admin');
+ * ```
+ */
+export async function updateRoomMemberRole(
+  roomId: number,
+  userId: number,
+  role: 'member' | 'admin'
+): Promise<RoomMembershipResponse> {
+  const response = await api.patch<{ data: RoomMembershipResponse, message: string }>(
+    `/v1/rooms/${roomId}/members/${userId}`,
+    { role }
+  );
+  return response.data.data;
+}
+
+/**
+ * Transfer room ownership to another member
+ * Requires current owner role
+ * Previous owner becomes admin
+ *
+ * @param roomId - Room ID
+ * @param newOwnerId - User ID of new owner
+ * @returns Promise with success message
+ *
+ * @example
+ * ```ts
+ * await transferRoomOwnership(1, 5);
+ * console.log('Ownership transferred');
+ * ```
+ */
+export async function transferRoomOwnership(
+  roomId: number,
+  newOwnerId: number
+): Promise<void> {
+  await api.post(`/v1/rooms/${roomId}/transfer-ownership`, {
+    new_owner_id: newOwnerId
+  });
+}
+
+/**
  * Mark a room as read for the current user
  * Updates the last_read timestamp to mark all messages as read
  *

@@ -2,7 +2,7 @@
 
 import type React from "react"
 import { useState, useEffect } from "react"
-import { Loader2, UserPlus, X, Search, Shield, Crown, User as UserIcon, AlertCircle } from "lucide-react"
+import { Loader2, UserPlus, X, Search, Shield, Crown, User as UserIcon, AlertCircle, ArrowUp, ArrowDown } from "lucide-react"
 import {
   Dialog,
   DialogContent,
@@ -15,8 +15,9 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { getRoomParticipants, inviteUserToRoom, removeUserFromRoom } from "@/lib/api/rooms"
+import { getRoomParticipants, inviteUserToRoom, removeUserFromRoom, updateRoomMemberRole } from "@/lib/api/rooms"
 import { getUsers } from "@/lib/api/users"
+import { TransferOwnershipDialog } from "@/components/TransferOwnershipDialog"
 import type { Room, ParticipantResponse } from "@/lib/api/rooms"
 import type { User } from "@/lib/types"
 
@@ -51,8 +52,15 @@ export function RoomMembersManager({ room, currentUserId, open, onOpenChange }: 
   const [loading, setLoading] = useState(false)
   const [inviting, setInviting] = useState(false)
   const [removingUserId, setRemovingUserId] = useState<number | null>(null)
+  const [updatingRoleUserId, setUpdatingRoleUserId] = useState<number | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [showInviteSection, setShowInviteSection] = useState(false)
+  const [transferOwnershipOpen, setTransferOwnershipOpen] = useState(false)
+  const [userToMakeOwner, setUserToMakeOwner] = useState<ParticipantResponse | null>(null)
+
+  // Find current user's role
+  const currentUserRole = participants.find(p => p.id === currentUserId)?.role.toLowerCase()
+  const isOwner = currentUserRole === 'owner'
 
   // Load participants when dialog opens
   useEffect(() => {
@@ -122,6 +130,44 @@ export function RoomMembersManager({ room, currentUserId, open, onOpenChange }: 
     } finally {
       setRemovingUserId(null)
     }
+  }
+
+  const handlePromoteToAdmin = async (userId: number) => {
+    try {
+      setUpdatingRoleUserId(userId)
+      setError(null)
+      await updateRoomMemberRole(room.id, userId, 'admin')
+      await loadParticipants()
+    } catch (err: any) {
+      console.error('Failed to promote user:', err)
+      setError(err.response?.data?.error || err.message || 'Failed to promote user')
+    } finally {
+      setUpdatingRoleUserId(null)
+    }
+  }
+
+  const handleDemoteToMember = async (userId: number) => {
+    try {
+      setUpdatingRoleUserId(userId)
+      setError(null)
+      await updateRoomMemberRole(room.id, userId, 'member')
+      await loadParticipants()
+    } catch (err: any) {
+      console.error('Failed to demote user:', err)
+      setError(err.response?.data?.error || err.message || 'Failed to demote user')
+    } finally {
+      setUpdatingRoleUserId(null)
+    }
+  }
+
+  const handleTransferOwnership = (participant: ParticipantResponse) => {
+    setUserToMakeOwner(participant)
+    setTransferOwnershipOpen(true)
+  }
+
+  const handleOwnershipTransferred = async () => {
+    await loadParticipants()
+    setUserToMakeOwner(null)
   }
 
   const getRoleIcon = (role: string) => {
@@ -228,22 +274,78 @@ export function RoomMembersManager({ room, currentUserId, open, onOpenChange }: 
                           </div>
                         </div>
 
-                        {/* Remove button (only if not current user and not owner) */}
-                        {participant.id !== currentUserId && participant.role.toLowerCase() !== 'owner' && (
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => handleRemoveUser(participant.id)}
-                            disabled={removingUserId === participant.id}
-                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                          >
-                            {removingUserId === participant.id ? (
-                              <Loader2 className="h-4 w-4 animate-spin" />
-                            ) : (
-                              <X className="h-4 w-4" />
-                            )}
-                          </Button>
-                        )}
+                        {/* Action buttons */}
+                        <div className="flex items-center gap-1">
+                          {/* Role management buttons (owner/admin only, not for yourself or owner) */}
+                          {participant.id !== currentUserId && participant.role.toLowerCase() !== 'owner' && (
+                            <>
+                              {/* Promote to Admin */}
+                              {participant.role.toLowerCase() === 'member' && (
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => handlePromoteToAdmin(participant.id)}
+                                  disabled={updatingRoleUserId === participant.id}
+                                  className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                                  title="Promote to Admin"
+                                >
+                                  {updatingRoleUserId === participant.id ? (
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                  ) : (
+                                    <ArrowUp className="h-4 w-4" />
+                                  )}
+                                </Button>
+                              )}
+
+                              {/* Demote to Member */}
+                              {participant.role.toLowerCase() === 'admin' && (
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => handleDemoteToMember(participant.id)}
+                                  disabled={updatingRoleUserId === participant.id}
+                                  className="text-gray-600 hover:text-gray-700 hover:bg-gray-100"
+                                  title="Demote to Member"
+                                >
+                                  {updatingRoleUserId === participant.id ? (
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                  ) : (
+                                    <ArrowDown className="h-4 w-4" />
+                                  )}
+                                </Button>
+                              )}
+
+                              {/* Transfer Ownership (owner only, admins only) */}
+                              {isOwner && participant.role.toLowerCase() === 'admin' && (
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => handleTransferOwnership(participant)}
+                                  className="text-yellow-600 hover:text-yellow-700 hover:bg-yellow-50"
+                                  title="Transfer Ownership"
+                                >
+                                  <Crown className="h-4 w-4" />
+                                </Button>
+                              )}
+
+                              {/* Remove button */}
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => handleRemoveUser(participant.id)}
+                                disabled={removingUserId === participant.id}
+                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                title="Remove from Room"
+                              >
+                                {removingUserId === participant.id ? (
+                                  <Loader2 className="h-4 w-4 animate-spin" />
+                                ) : (
+                                  <X className="h-4 w-4" />
+                                )}
+                              </Button>
+                            </>
+                          )}
+                        </div>
                       </div>
                     ))}
 
@@ -333,6 +435,17 @@ export function RoomMembersManager({ room, currentUserId, open, onOpenChange }: 
           </Button>
         </DialogFooter>
       </DialogContent>
+
+      {/* Transfer Ownership Dialog */}
+      {userToMakeOwner && (
+        <TransferOwnershipDialog
+          room={room}
+          participant={userToMakeOwner}
+          open={transferOwnershipOpen}
+          onOpenChange={setTransferOwnershipOpen}
+          onTransferred={handleOwnershipTransferred}
+        />
+      )}
     </Dialog>
   )
 }
