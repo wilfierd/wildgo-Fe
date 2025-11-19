@@ -2,7 +2,7 @@
 
 This document tracks the implementation progress of the Next.js frontend integration with the Go backend, following the plan outlined in `FRONTEND_BACKEND_INTEGRATION_PLAN.md`.
 
-**Last Updated:** 2025-01-17
+**Last Updated:** 2025-01-19
 **Repository:** [wildgo-Fe](https://github.com/wilfierd/wildgo-Fe)
 **Backend Repository:** [windgo-chat](https://github.com/wilfierd/windgo-chat)
 
@@ -13,10 +13,10 @@ This document tracks the implementation progress of the Next.js frontend integra
 | Phase | Status | Progress |
 |-------|--------|----------|
 | **Phase 1: Core Chat Functionality** | ✅ Complete | 100% (4/4) |
-| **Phase 2: Advanced Features** | ⏳ In Progress | 50% (3/6) |
+| **Phase 2: Advanced Features** | ✅ Complete | 100% (6/6) |
 | **Phase 3: Polish & Extras** | ⏳ Pending | 0% (0/2) |
 
-**Total Progress:** 58% (7/12 steps completed)
+**Total Progress:** 83% (10/12 steps completed)
 
 ---
 
@@ -143,24 +143,24 @@ This document tracks the implementation progress of the Next.js frontend integra
 
 ---
 
-## ⏳ Phase 2: Advanced Features (IN PROGRESS)
+## ✅ Phase 2: Advanced Features (COMPLETE)
 
-### Step 5: Direct Messages UI ❌
-**Status:** Not Started
+### Step 5: Direct Messages UI ✅
+**Status:** ✅ Complete
 **Dependencies:** PR #1, PR #2
 
-**Todo:**
-- [ ] Create DM list component
-- [ ] Implement `createDirectRoom()` UI
-- [ ] Fetch and display DM conversations
-- [ ] Show online status indicators
-- [ ] Display unread counts from API
-- [ ] Add last message preview
+**Implemented:**
+- [x] Create DM list component
+- [x] Implement `createDirectRoom()` UI
+- [x] Fetch and display DM conversations
+- [x] Show online status indicators
+- [x] Display unread counts from API
+- [x] Add last message preview
 
-**Files to Update:**
-- `app/chat/page.tsx` - Replace mock DM data
-- Create `components/DirectMessageList.tsx`
-- Create `components/DirectMessageCard.tsx`
+**Files Updated:**
+- `app/chat/page.tsx` - Uses real API calls for DMs
+- `components/DirectMessageCard.tsx` - Created
+- `components/CreateDMButton.tsx` - Created
 
 ---
 
@@ -200,22 +200,29 @@ This document tracks the implementation progress of the Next.js frontend integra
 
 ---
 
-### Step 8: Room Management UI (Admin) ❌
-**Status:** Not Started
+### Step 8: Room Management UI (Admin) ✅
+**Status:** ✅ Complete
 **Dependencies:** PR #2, Admin role check
 
-**Todo:**
-- [ ] Create room creation UI (admin only)
-- [ ] Edit room settings UI
-- [ ] Delete room UI with confirmation
-- [ ] Invite/remove members UI
-- [ ] Show admin controls based on user role
+**Implemented:**
+- [x] Create room creation UI (admin only)
+- [x] Edit room settings UI
+- [x] Delete room UI with confirmation
+- [x] Invite/remove members UI
+- [x] Show admin controls based on user role
 
-**Files to Create:**
-- `components/CreateRoomDialog.tsx`
-- `components/EditRoomDialog.tsx`
-- `components/RoomMembersManager.tsx`
-- `app/admin/rooms/page.tsx`
+**Files Created:**
+- `components/CreateRoomDialog.tsx` - ✅ Created (174 lines)
+- `components/EditRoomDialog.tsx` - ✅ Created (169 lines)
+- `components/DeleteRoomConfirm.tsx` - ✅ Created (115 lines)
+- `components/RoomMembersManager.tsx` - ✅ Created (324 lines)
+
+**Integration:**
+- `app/chat/page.tsx` - ✅ Updated with admin controls
+  - Create room button in sidebar (admin only)
+  - Room management dropdown in chat header (admin only, group rooms)
+  - Edit, Delete, and Manage Members options
+  - All dialogs integrated with state management
 
 ---
 
@@ -276,11 +283,16 @@ chat-frontend-next/
 ├── components/
 │   ├── LoginForm.tsx          ✅ Login form (updated)
 │   ├── DirectMessageCard.tsx  ✅ DM card with unread counts (PR #8)
+│   ├── CreateDMButton.tsx     ✅ Create DM dialog
 │   ├── MessageActions.tsx     ✅ Edit/Delete/Reply actions (PR #9, #5)
 │   ├── MessageBubble.tsx      ✅ Message display with threading (PR #5)
 │   ├── MessageInput.tsx       ✅ Input with reply preview (PR #5)
 │   ├── MessageList.tsx        ✅ Message list component
 │   ├── TypingIndicator.tsx    ✅ Typing indicator (PR #5)
+│   ├── CreateRoomDialog.tsx   ✅ Create room dialog (admin)
+│   ├── EditRoomDialog.tsx     ✅ Edit room dialog (admin)
+│   ├── DeleteRoomConfirm.tsx  ✅ Delete room confirmation (admin)
+│   ├── RoomMembersManager.tsx ✅ Manage room members (admin)
 │   └── ...                    (other components)
 ├── app/
 │   ├── chat/page.tsx          ✅ Real-time chat with API/WebSocket (PR #8, #5)
@@ -319,18 +331,17 @@ chat-frontend-next/
    - ✅ TypingIndicator component
    - ✅ Real-time typing status
 
-### High Priority
-5. **Direct Messages UI** (Partially Complete)
+5. ✅ **Direct Messages UI** (Complete)
    - ✅ List all DMs (PR #8)
    - ✅ Create new DM (PR #8)
    - ✅ Online status (PR #8)
    - ✅ Last message preview (PR #8)
-   - [ ] Improve UI/UX
 
-6. **Room Management (Admin)**
-   - [ ] Create/edit/delete rooms UI
-   - [ ] Invite/remove users UI
-   - [ ] Admin-only controls
+6. ✅ **Room Management (Admin)** (Complete)
+   - ✅ Create/edit/delete rooms UI
+   - ✅ Invite/remove users UI
+   - ✅ Admin-only controls
+   - ✅ All components created and integrated
 
 ### Medium Priority
 7. **User Features**
@@ -547,4 +558,4 @@ For issues or questions:
 ---
 
 **Generated by:** Claude (AI Assistant)
-**Last Updated:** 2025-01-09
+**Last Updated:** 2025-01-19

@@ -1,6 +1,6 @@
 # TODO: Frontend-Backend Integration Progress
 
-**Last Updated:** 2025-01-17
+**Last Updated:** 2025-01-19
 **Frontend Repository:** [wildgo-Fe](https://github.com/wilfierd/wildgo-Fe)
 **Backend Repository:** [windgo-chat](https://github.com/wilfierd/windgo-chat)
 
@@ -390,41 +390,52 @@ other_user: {
 
 ---
 
-#### Room Management UI (Admin) ❌
-**Status:** API ready, UI not created
+#### Room Management UI (Admin) ✅
+**Status:** ✅ Complete - Fully implemented and integrated
 
-**TODO:**
-- [ ] Create `components/CreateRoomDialog.tsx` (admin only)
-  - Room name input
-  - Call `createRoom({ name })`
+**COMPLETED:**
+- [x] Created `components/CreateRoomDialog.tsx` (admin only) - 174 lines
+  - Room name input with validation
+  - Calls `createRoom({ name })`
+  - Loading and error states
+  - Character counter
 
-- [ ] Create `components/EditRoomDialog.tsx` (admin only)
+- [x] Created `components/EditRoomDialog.tsx` (admin only) - 169 lines
   - Edit room name
-  - Call `updateRoom(roomId, { name })`
+  - Calls `updateRoom(roomId, { name })`
+  - Pre-filled with current name
+  - Validation and error handling
 
-- [ ] Create `components/DeleteRoomConfirm.tsx` (admin only)
-  - Confirmation dialog
-  - Call `deleteRoom(roomId)`
+- [x] Created `components/DeleteRoomConfirm.tsx` (admin only) - 115 lines
+  - Confirmation dialog with warning
+  - Calls `deleteRoom(roomId)`
+  - Shows room name to be deleted
+  - Loading states
 
-- [ ] Create `components/RoomMembersManager.tsx` (admin only)
-  - List participants with `getRoomParticipants(roomId)`
+- [x] Created `components/RoomMembersManager.tsx` (admin only) - 324 lines
+  - Lists participants with `getRoomParticipants(roomId)`
   - Invite users with `inviteUserToRoom(roomId, { user_id, role })`
   - Remove users with `removeUserFromRoom(roomId, userId)`
+  - User search functionality
+  - Role badges (owner, admin, member)
+  - Online status indicators
 
-**API Available:**
+**Integration in `app/chat/page.tsx`:**
+- [x] Create room button in sidebar header (admin only)
+- [x] Room management dropdown in chat header (admin only, group rooms)
+- [x] Edit, Delete, and Manage Members options
+- [x] All dialogs integrated with state management
+- [x] Admin check: `const isAdmin = user?.role === 'admin'`
+
+**API Used:**
 ```typescript
 ✅ createRoom(data: CreateRoomRequest): Promise<Room>
 ✅ updateRoom(roomId: number, data: UpdateRoomRequest): Promise<Room>
 ✅ deleteRoom(roomId: number): Promise<void>
 ✅ getRoomParticipants(roomId: number): Promise<ParticipantResponse[]>
-✅ inviteUserToRoom(roomId: number, data: InviteUserRequest): Promise<any>
+✅ inviteUserToRoom(roomId: number, data: InviteUserRequest): Promise<RoomMembershipResponse>
 ✅ removeUserFromRoom(roomId: number, userId: number): Promise<void>
-```
-
-**Admin Check:**
-```typescript
-const { user } = useAuth();
-const isAdmin = user?.role === 'admin';
+✅ getUsers(search?: string): Promise<User[]>
 ```
 
 ---
@@ -571,14 +582,15 @@ const isAdmin = user?.role === 'admin';
 
    **Estimated Effort:** 1-2 hours
 
-10. **Room Management (Admin)**
-    - [ ] Create `components/CreateRoomDialog.tsx`
-    - [ ] Create `components/EditRoomDialog.tsx`
-    - [ ] Create `components/DeleteRoomConfirm.tsx`
-    - [ ] Create `components/RoomMembersManager.tsx`
-    - [ ] Show only for admin users
+10. **Room Management (Admin)** ✅
+    - [x] Create `components/CreateRoomDialog.tsx`
+    - [x] Create `components/EditRoomDialog.tsx`
+    - [x] Create `components/DeleteRoomConfirm.tsx`
+    - [x] Create `components/RoomMembersManager.tsx`
+    - [x] Show only for admin users
+    - [x] Integrated into chat page
 
-    **Estimated Effort:** 4-5 hours
+    **Status:** ✅ Completed (4-5 hours)
 
 11. **GitHub OAuth UI**
     - [ ] Create `components/GitHubLoginButton.tsx`
@@ -611,6 +623,10 @@ const isAdmin = user?.role === 'admin';
 - [x] `chat-frontend-next/components/MessageActions.tsx` - ✅ Edit/delete actions
 - [x] `chat-frontend-next/components/EditMessageModal.tsx` - ✅ Edit modal
 - [x] `chat-frontend-next/components/DeleteMessageConfirm.tsx` - ✅ Delete confirmation
+- [x] `chat-frontend-next/components/CreateRoomDialog.tsx` - ✅ Create room dialog (admin)
+- [x] `chat-frontend-next/components/EditRoomDialog.tsx` - ✅ Edit room dialog (admin)
+- [x] `chat-frontend-next/components/DeleteRoomConfirm.tsx` - ✅ Delete room confirmation (admin)
+- [x] `chat-frontend-next/components/RoomMembersManager.tsx` - ✅ Room members manager (admin)
 - [x] `chat-frontend-next/components/ui/dialog.tsx` - ✅ Modal component
 - [x] `docs/API_AUTH.md`
 - [x] `docs/API_ROOMS.md`
@@ -625,12 +641,7 @@ const isAdmin = user?.role === 'admin';
 
 ### ❌ Not Created Yet (Optional/Advanced Features)
 - [ ] `chat-frontend-next/components/ThreadedMessage.tsx`
-- [ ] `chat-frontend-next/components/TypingIndicator.tsx`
 - [ ] `chat-frontend-next/components/OnlineStatusBadge.tsx`
-- [ ] `chat-frontend-next/components/CreateRoomDialog.tsx`
-- [ ] `chat-frontend-next/components/EditRoomDialog.tsx`
-- [ ] `chat-frontend-next/components/DeleteRoomConfirm.tsx`
-- [ ] `chat-frontend-next/components/RoomMembersManager.tsx`
 - [ ] `chat-frontend-next/components/UserSearch.tsx`
 - [ ] `chat-frontend-next/components/UserListItem.tsx`
 - [ ] `chat-frontend-next/components/GitHubLoginButton.tsx`
@@ -740,5 +751,5 @@ const isAdmin = user?.role === 'admin';
 
 ---
 
-**Last Updated:** 2025-01-09
-**Next Update:** After completing High Priority items
+**Last Updated:** 2025-01-19
+**Next Update:** After completing remaining optional features (GitHub OAuth, etc.)
