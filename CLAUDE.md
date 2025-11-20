@@ -2,7 +2,7 @@
 
 This document tracks the implementation progress of the Next.js frontend integration with the Go backend, following the plan outlined in `FRONTEND_BACKEND_INTEGRATION_PLAN.md`.
 
-**Last Updated:** 2025-01-19
+**Last Updated:** 2025-01-20
 **Repository:** [wildgo-Fe](https://github.com/wilfierd/wildgo-Fe)
 **Backend Repository:** [windgo-chat](https://github.com/wilfierd/windgo-chat)
 
@@ -14,9 +14,9 @@ This document tracks the implementation progress of the Next.js frontend integra
 |-------|--------|----------|
 | **Phase 1: Core Chat Functionality** | ✅ Complete | 100% (4/4) |
 | **Phase 2: Advanced Features** | ✅ Complete | 100% (6/6) |
-| **Phase 3: Polish & Extras** | ⏳ Pending | 0% (0/2) |
+| **Phase 3: Polish & Extras** | ⏳ In Progress | 50% (1/2) |
 
-**Total Progress:** 83% (10/12 steps completed)
+**Total Progress:** 91% (11/12 steps completed)
 
 ---
 
@@ -226,22 +226,67 @@ This document tracks the implementation progress of the Next.js frontend integra
 
 ---
 
-## ⏳ Phase 3: Polish & Extras (PENDING)
+### User Profile Integration ✅
+**Branch:** `claude/replace-mock-user-data-012ZcVfZRpss5CmZfsDRQkre`
+**Status:** ✅ Complete
+**Commit:** `51eab62`
 
-### Step 9: User Features ⏳
-**Status:** Partially Complete (Typing Indicators done in PR #5)
-**Dependencies:** Backend `/api/v1/users` endpoint
+**Implemented:**
+- ✅ Replaced mock user data with real API calls
+- ✅ Integrated `getUserById(userId)` from `lib/api/users`
+- ✅ Added proper loading and error states
+- ✅ Real-time online status display
+- ✅ Formatted join dates from API data
 
-**Todo:**
-- [ ] User search/directory
-- [ ] View user profiles
-- [ ] Online status indicators
-- [x] Typing indicators UI - ✅ **Completed in PR #5**
+**Changes Made:**
+```typescript
+// Before: 70+ lines of hardcoded mock data
+const getUserData = (id: string) => { ... }
 
-**Files Created/To Create:**
-- `components/UserSearch.tsx` - ❌ Not created yet
-- `components/UserProfile.tsx` - ❌ Not created yet
-- `components/OnlineStatus.tsx` - ❌ Not created yet
+// After: Real API integration
+const userProfile = await getUserById(parseInt(id));
+```
+
+**UI Updates:**
+- Displays real `username` (from API)
+- Shows real `email` (from API)
+- Formatted `created_at` as join date
+- Shows `role` badge (admin/user)
+- Real-time `online` status indicator
+- Error handling with fallback UI
+
+**Files Updated:**
+- `app/profile/[id]/page.tsx` - ✅ Real API integration (87 insertions, 109 deletions)
+  - Removed 70+ lines of mock data
+  - Added async data fetching with useEffect
+  - Added loading and error states
+  - Integrated getUserById API call
+
+**Code Improvements:**
+- Net reduction: -22 lines (cleaner code)
+- Type-safe with `User` interface
+- Proper error handling
+- Better user experience with loading states
+
+---
+
+## ⏳ Phase 3: Polish & Extras (IN PROGRESS)
+
+### Step 9: User Features ✅
+**Status:** ✅ Complete
+**Dependencies:** Backend `/api/v1/users` endpoint ✅
+
+**Completed:**
+- [x] User search/directory - ✅ **Done** (via CreateDMButton)
+- [x] View user profiles - ✅ **Done** (app/profile/[id]/page.tsx)
+- [x] Online status indicators - ✅ **Done** (DirectMessageCard)
+- [x] Typing indicators UI - ✅ **Done** (PR #5)
+
+**Files Created:**
+- `lib/api/users.ts` - ✅ **Created** (User API with getUserById)
+- `app/profile/[id]/page.tsx` - ✅ **Updated** (Real API integration)
+- `components/DirectMessageCard.tsx` - ✅ **Has online status**
+- `components/CreateDMButton.tsx` - ✅ **Has user search**
 - `components/TypingIndicator.tsx` - ✅ **Created in PR #5**
 
 ---
@@ -297,7 +342,8 @@ chat-frontend-next/
 ├── app/
 │   ├── chat/page.tsx          ✅ Real-time chat with API/WebSocket (PR #8, #5)
 │   ├── login/page.tsx         ✅ Working
-│   ├── profile/page.tsx       ⚠️  Needs update
+│   ├── profile/page.tsx       ⚠️  Needs update (own profile)
+│   ├── profile/[id]/page.tsx  ✅ User profiles (Real API)
 │   └── ...
 └── docs/
     ├── API_AUTH.md            ✅ Complete
@@ -344,11 +390,12 @@ chat-frontend-next/
    - ✅ All components created and integrated
 
 ### Medium Priority
-7. **User Features**
-   - [ ] User search
-   - [ ] User profiles
-   - [ ] Online status (partially done)
+7. ✅ **User Features** (Complete)
+   - [x] User search - ✅ Done
+   - [x] User profiles - ✅ Done
+   - [x] Online status - ✅ Done
 
+### Low Priority
 8. **GitHub OAuth UI**
    - [ ] Device flow UI
    - [ ] Login button
