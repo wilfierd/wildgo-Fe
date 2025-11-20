@@ -378,21 +378,29 @@ The frontend has **ALL API layers complete** AND **core chat UI is fully integra
 
 ---
 
-#### Online Status UI ❌
-**Status:** API returns it, UI not showing it
+#### Online Status UI ✅
+**Status:** ✅ Complete - Reusable component implemented
 
-**TODO:**
-- [ ] Create `components/OnlineStatusBadge.tsx`
-  - Green dot if user.is_online
-  - Use data from `getDirectRooms()` response
+**COMPLETED:**
+- [x] Created `components/OnlineStatusBadge.tsx` - 91 lines
+  - Green dot for online users (`bg-green-500`)
+  - Optional gray dot for offline users (`bg-gray-400`)
+  - Three size variants: sm (12px), md (16px), lg (24px)
+  - Absolute positioning for avatar overlays
+  - White border for contrast
+  - Accessible with aria-label and title
 
-**Data Available:**
+**Integration:**
+- [x] `components/DirectMessageCard.tsx` - Uses size="sm" for DM list
+- [x] `app/profile/[id]/page.tsx` - Uses size="lg" with showOffline prop
+
+**Data Source:**
 ```typescript
 // DirectRoomResponse includes:
 other_user: {
   id: number;
   username: string;
-  is_online: boolean;  // ✅ Available
+  is_online: boolean;  // ✅ Used
   last_active_at?: string;
 }
 ```
@@ -636,6 +644,7 @@ other_user: {
 - [x] `chat-frontend-next/components/EditRoomDialog.tsx` - ✅ Edit room dialog (admin)
 - [x] `chat-frontend-next/components/DeleteRoomConfirm.tsx` - ✅ Delete room confirmation (admin)
 - [x] `chat-frontend-next/components/RoomMembersManager.tsx` - ✅ Room members manager (admin)
+- [x] `chat-frontend-next/components/OnlineStatusBadge.tsx` - ✅ Online status indicator
 - [x] `chat-frontend-next/components/ui/dialog.tsx` - ✅ Modal component
 - [x] `docs/API_AUTH.md`
 - [x] `docs/API_ROOMS.md`
@@ -652,7 +661,6 @@ other_user: {
 
 ### ❌ Not Created Yet (Optional/Advanced Features)
 - [ ] `chat-frontend-next/components/ThreadedMessage.tsx`
-- [ ] `chat-frontend-next/components/OnlineStatusBadge.tsx`
 - [ ] `chat-frontend-next/components/UserSearch.tsx`
 - [ ] `chat-frontend-next/components/UserListItem.tsx`
 - [ ] `chat-frontend-next/components/GitHubLoginButton.tsx`
