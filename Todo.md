@@ -1,6 +1,6 @@
 # TODO: Frontend-Backend Integration Progress
 
-**Last Updated:** 2025-01-19
+**Last Updated:** 2025-01-20
 **Frontend Repository:** [wildgo-Fe](https://github.com/wilfierd/wildgo-Fe)
 **Backend Repository:** [windgo-chat](https://github.com/wilfierd/windgo-chat)
 
@@ -208,12 +208,21 @@ The frontend has **ALL API layers complete** AND **core chat UI is fully integra
 
 ---
 
-### ⚠️ Remaining Files Using Mock Data
+### ✅ Profile Pages Updated with Real API
 
-#### `app/profile/[id]/page.tsx` - User Profiles
-**Current:** Uses hardcoded user data
-**Needed:** Fetch from `/api/v1/users/:id` (not implemented yet)
-**Priority:** 🟢 Low (user API not implemented)
+#### `app/profile/[id]/page.tsx` - User Profiles ✅
+**Status:** ✅ Complete - Now uses real API data
+**Branch:** `claude/replace-mock-user-data-012ZcVfZRpss5CmZfsDRQkre`
+**Commit:** `51eab62`
+
+**Completed:**
+- [x] Replaced 70+ lines of mock user data
+- [x] Integrated `getUserById(userId)` from `lib/api/users`
+- [x] Added loading and error states
+- [x] Real-time online status display
+- [x] Formatted join dates from API data
+
+**Note:** `app/profile/page.tsx` (own profile) still needs update, but lower priority
 
 ---
 
@@ -636,8 +645,10 @@ other_user: {
 - [x] `Todo.md`
 
 ### ⏳ Needs Update (Using Mock Data)
-- [ ] `chat-frontend-next/app/profile/page.tsx` - User profile
-- [ ] `chat-frontend-next/app/profile/[id]/page.tsx` - Other user profiles
+- [ ] `chat-frontend-next/app/profile/page.tsx` - Own user profile (low priority)
+
+### ✅ Recently Updated with Real API
+- [x] `chat-frontend-next/app/profile/[id]/page.tsx` - ✅ Other user profiles (Real API)
 
 ### ❌ Not Created Yet (Optional/Advanced Features)
 - [ ] `chat-frontend-next/components/ThreadedMessage.tsx`
@@ -751,5 +762,5 @@ other_user: {
 
 ---
 
-**Last Updated:** 2025-01-19
+**Last Updated:** 2025-01-20
 **Next Update:** After completing remaining optional features (GitHub OAuth, etc.)
