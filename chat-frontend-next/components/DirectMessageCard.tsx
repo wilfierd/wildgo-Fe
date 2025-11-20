@@ -4,6 +4,7 @@ import type React from "react"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { cn } from "@/lib/utils"
 import type { DirectRoomResponse } from "@/lib/api/rooms"
+import { OnlineStatusBadge } from "./OnlineStatusBadge"
 
 interface DirectMessageCardProps {
   dm: DirectRoomResponse
@@ -71,9 +72,7 @@ export function DirectMessageCard({ dm, isSelected = false, onClick }: DirectMes
             {getInitials(dm.other_user.username)}
           </AvatarFallback>
         </Avatar>
-        {dm.other_user.is_online && (
-          <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 bg-green-500 border-2 border-white rounded-full" />
-        )}
+        <OnlineStatusBadge isOnline={dm.other_user.is_online} size="sm" />
       </div>
 
       {/* Message info */}
