@@ -9,6 +9,7 @@ import { ArrowLeft, MessageCircle, Phone, Video, Mail, Calendar } from "lucide-r
 import Link from "next/link"
 import { getUserById } from "@/lib/api/users"
 import type { User } from "@/lib/types"
+import { OnlineStatusBadge } from "@/components/OnlineStatusBadge"
 
 export default function UserProfilePage({ params }: { params: Promise<{ id: string }> }) {
     const { isAuthenticated, loading, user } = useAuth();
@@ -102,9 +103,7 @@ export default function UserProfilePage({ params }: { params: Promise<{ id: stri
                                     {getInitials(userData.username)}
                                 </AvatarFallback>
                             </Avatar>
-                            {userData.online && (
-                                <div className="absolute -bottom-1 -right-1 h-6 w-6 bg-black border-3 border-white rounded-full" />
-                            )}
+                            <OnlineStatusBadge isOnline={userData.online} size="lg" showOffline />
                         </div>
                         <h2 className="text-2xl font-semibold text-black mt-4">{userData.username}</h2>
                         <p className="text-sm text-gray-500 mt-2">
