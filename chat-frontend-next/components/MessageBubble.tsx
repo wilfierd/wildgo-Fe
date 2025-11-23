@@ -42,7 +42,7 @@ export function MessageBubble({ message, isOwn, showAvatar = true, onEdit, onDel
       {/* Avatar for other users */}
       {!isOwn && showAvatar && (
         <Avatar className="h-8 w-8 flex-shrink-0">
-          <AvatarFallback className="bg-gray-100 text-black font-medium border border-gray-200 text-xs">
+          <AvatarFallback className="bg-gray-100 text-black font-medium border border-gray-200 text-xs select-none">
             {message.user ? getInitials(message.user.username) : 'U'}
           </AvatarFallback>
         </Avatar>
@@ -55,7 +55,7 @@ export function MessageBubble({ message, isOwn, showAvatar = true, onEdit, onDel
       <div className={cn("max-w-xs lg:max-w-md space-y-1", isOwn && "items-end")}>
         {/* Show username for other users */}
         {!isOwn && showAvatar && message.user && (
-          <p className="text-xs text-gray-500 px-1">{message.user.username}</p>
+          <p className="text-xs text-gray-500 px-1 select-none">{message.user.username}</p>
         )}
 
         {/* Parent message (thread reply) */}
@@ -85,7 +85,7 @@ export function MessageBubble({ message, isOwn, showAvatar = true, onEdit, onDel
           >
             <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
             <div className={cn(
-              "flex items-center gap-2 mt-1",
+              "flex items-center gap-2 mt-1 select-none",
               isOwn && "justify-end"
             )}>
               <p className={cn("text-xs", isOwn ? "text-gray-300" : "text-gray-500")}>

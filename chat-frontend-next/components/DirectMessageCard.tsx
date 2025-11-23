@@ -61,7 +61,7 @@ export function DirectMessageCard({ dm, isSelected = false, onClick }: DirectMes
     <div
       onClick={onClick}
       className={cn(
-        "flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all duration-200 hover:bg-gray-50",
+        "flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all duration-200 hover:bg-gray-50 select-none",
         isSelected && "bg-gray-100"
       )}
     >

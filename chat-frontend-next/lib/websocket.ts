@@ -131,7 +131,10 @@ export class WebSocketClient {
         };
 
         this.ws.onerror = (event) => {
-          console.error('WebSocket error:', event);
+          // Only log in development or if connection was previously established
+          if (process.env.NODE_ENV === 'development' && this.reconnectAttempts > 0) {
+            console.warn('WebSocket connection error (retrying...)');
+          }
           const error = new Error('WebSocket connection error');
           this.errorHandlers.forEach(handler => handler(error));
           reject(error);

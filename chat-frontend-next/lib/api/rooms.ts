@@ -31,6 +31,7 @@ export interface Room {
   display_name?: string;
   messages?: Message[];
   members?: User[];
+  unread_count?: number;  // Added to match backend response
   created_at: string;
   updated_at: string;
 }
@@ -109,8 +110,9 @@ export interface RoomMembershipResponse {
  * ```
  */
 export async function getRooms(): Promise<Room[]> {
-  const response = await api.get<{ data: Room[], message: string }>('/v1/rooms');
-  return response.data.data;
+  const response = await api.get<{ rooms: Room[] }>('/v1/rooms');
+  // Backend returns { rooms: [...] } instead of { data: [...] }
+  return response.data.rooms || [];
 }
 
 /**
@@ -195,8 +197,18 @@ export async function deleteRoom(roomId: number): Promise<void> {
  * ```
  */
 export async function getDirectRooms(): Promise<DirectRoomResponse[]> {
-  const response = await api.get<{ data: DirectRoomResponse[], message: string }>('/v1/rooms/direct');
-  return response.data.data;
+  try {
+    const response = await api.get<{ data: DirectRoomResponse[], message: string }>('/v1/rooms/direct');
+    // Backend returns { data: [...], message: "..." }
+    return response.data.data || [];
+  } catch (error: any) {
+    // Handle 404 error (backend route conflict: /rooms/:id catches /rooms/direct)
+    if (error.response?.status === 404) {
+      console.warn('Direct rooms endpoint returned 404 - this is a backend routing issue. Falling back to empty array.');
+      return [];
+    }
+    throw error;
+  }
 }
 
 /**

@@ -76,7 +76,7 @@ export function MessageList({
   }
 
   return (
-    <ScrollArea className="flex-1 bg-gray-50">
+    <ScrollArea className="flex-1 bg-gray-50 h-0">
       <div className="p-4 space-y-4">
         {/* Load more button */}
         {hasMore && onLoadMore && (
@@ -109,7 +109,7 @@ export function MessageList({
 
         {/* Empty state */}
         {messages.length === 0 && !loading && (
-          <div className="flex flex-col items-center justify-center py-12 text-center">
+          <div className="flex flex-col items-center justify-center py-12 text-center select-none">
             <div className="text-gray-400 mb-2">
               <svg
                 className="w-16 h-16 mx-auto"
@@ -135,7 +135,7 @@ export function MessageList({
           <div key={date} className="space-y-2">
             {/* Date separator */}
             <div className="flex items-center justify-center py-2">
-              <div className="bg-white px-3 py-1 rounded-full border border-gray-200 shadow-sm">
+              <div className="bg-white px-3 py-1 rounded-full border border-gray-200 shadow-sm select-none">
                 <p className="text-xs text-gray-500 font-medium">{date}</p>
               </div>
             </div>

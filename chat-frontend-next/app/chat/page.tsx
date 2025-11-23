@@ -114,6 +114,10 @@ export default function ChatPage() {
       if (selectedRoomId) {
         markAsRead(selectedRoomId)
       }
+
+      // Reload rooms to update the order (most recent on top)
+      // This ensures the chat list shows the most recently active rooms first
+      loadRoomsAndDMs()
     }
   }, [wsMessages, selectedRoomId])
 
@@ -139,9 +143,9 @@ export default function ChatPage() {
           setSelectedRoomId(roomsData[0].id)
         }
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to load rooms:', err)
-      setError('Failed to load conversations')
+      setError(err.response?.data?.error || err.message || 'Failed to load conversations')
     } finally {
       setLoadingRooms(false)
     }
@@ -292,7 +296,7 @@ export default function ChatPage() {
     if (!room) return ''
 
     if ('display_name' in room) {
-      return room.display_name
+      return room.display_name || room.name
     }
 
     return room.name
@@ -300,8 +304,16 @@ export default function ChatPage() {
 
   // Get avatar initials
   const getInitials = (name: string) => {
-    return name
-      .split(' ')
+    // Remove non-alphabetic characters and get initials from words
+    const cleaned = name.replace(/[^a-zA-Z\s]/g, '')
+    const words = cleaned.split(' ').filter(word => word.length > 0)
+    
+    if (words.length === 0) {
+      // Fallback: use first 2 letters from original name
+      return name.replace(/[^a-zA-Z]/g, '').slice(0, 2).toUpperCase() || '??'
+    }
+    
+    return words
       .map((word) => word[0])
       .join('')
       .toUpperCase()
@@ -317,7 +329,7 @@ export default function ChatPage() {
   // Get unread count
   const getUnreadCount = (room: Room | DirectRoomResponse): number => {
     if ('unread_count' in room) {
-      return room.unread_count
+      return room.unread_count ?? 0
     }
     return 0
   }
@@ -361,16 +373,39 @@ export default function ChatPage() {
     setShowRoomMenu(false)
   }
 
-  // Filter combined rooms based on search
+  // Filter combined rooms based on search and sort by most recent
   const getAllRooms = (): Array<Room | DirectRoomResponse> => {
     const combined = [...directRooms, ...rooms]
 
-    if (!searchQuery.trim()) return combined
+    // Filter by search query if present
+    const filtered = !searchQuery.trim()
+      ? combined
+      : combined.filter((room) => {
+          const name = getRoomDisplayName(room).toLowerCase()
+          return name.includes(searchQuery.toLowerCase())
+        })
 
-    const query = searchQuery.toLowerCase()
-    return combined.filter((room) => {
-      const name = getRoomDisplayName(room).toLowerCase()
-      return name.includes(query)
+    // Sort by most recent activity (last message time or room update time)
+    return filtered.sort((a, b) => {
+      // Get the most recent timestamp for each room
+      const getLastActivityTime = (room: Room | DirectRoomResponse): number => {
+        // For direct messages, use last_message timestamp
+        if ('last_message' in room && room.last_message) {
+          return new Date(room.last_message.created_at).getTime()
+        }
+        // For group rooms (which have updated_at), use that
+        if ('updated_at' in room && room.updated_at) {
+          return new Date(room.updated_at).getTime()
+        }
+        // Fallback to created_at
+        return new Date(room.created_at).getTime()
+      }
+
+      const timeA = getLastActivityTime(a)
+      const timeB = getLastActivityTime(b)
+
+      // Sort descending (most recent first)
+      return timeB - timeA
     })
   }
 
@@ -393,9 +428,9 @@ export default function ChatPage() {
       {/* Chat List Sidebar */}
       <div className="w-80 border-r border-gray-200 bg-white flex flex-col">
         {/* Header */}
-        <div className="p-4 border-b border-gray-200">
+        <div className="p-4 border-b border-gray-200 flex-shrink-0">
           <div className="flex items-center justify-between mb-3">
-            <h1 className="text-xl font-semibold text-black">Messages</h1>
+            <h1 className="text-xl font-semibold text-black select-none">Messages</h1>
             <div className="flex items-center gap-2">
               <CreateDMButton
                 onDMCreated={(roomId) => {
@@ -495,13 +530,13 @@ export default function ChatPage() {
                     key={room.id}
                     onClick={() => setSelectedRoomId(room.id)}
                     className={cn(
-                      "flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all duration-200 hover:bg-gray-50",
+                      "flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all duration-200 hover:bg-gray-50 select-none",
                       isSelected && "bg-gray-100"
                     )}
                   >
                     <div className="relative">
                       <Avatar className="h-12 w-12">
-                        <AvatarFallback className="bg-gray-100 text-black font-medium border border-gray-200">
+                        <AvatarFallback className="bg-gray-100 text-black font-medium border border-gray-200 select-none">
                           {getInitials(displayName)}
                         </AvatarFallback>
                       </Avatar>
@@ -532,7 +567,7 @@ export default function ChatPage() {
         {selectedRoom ? (
           <>
             {/* Chat Header */}
-            <div className="p-4 border-b border-gray-200 bg-white flex items-center justify-between">
+            <div className="p-4 border-b border-gray-200 bg-white flex items-center justify-between flex-shrink-0 select-none">
               <div className="flex items-center gap-3">
                 <div className="relative">
                   <Avatar className="h-10 w-10">
@@ -630,17 +665,20 @@ export default function ChatPage() {
               onReply={handleReply}
             />
 
-            {/* Typing Indicator */}
-            <TypingIndicator roomId={selectedRoomId} />
+            {/* Input Area (Typing Indicator + Message Input) */}
+            <div className="flex-shrink-0">
+              {/* Typing Indicator */}
+              <TypingIndicator roomId={selectedRoomId} />
 
-            {/* Message Input */}
-            <MessageInput
-              onSend={handleSendMessage}
-              onTypingChange={handleTypingChange}
-              disabled={!isConnected}
-              replyTo={replyTo}
-              onCancelReply={handleCancelReply}
-            />
+              {/* Message Input */}
+              <MessageInput
+                onSend={handleSendMessage}
+                onTypingChange={handleTypingChange}
+                disabled={!isConnected}
+                replyTo={replyTo}
+                onCancelReply={handleCancelReply}
+              />
+            </div>
           </>
         ) : (
           <div className="flex-1 flex items-center justify-center bg-gray-50">
