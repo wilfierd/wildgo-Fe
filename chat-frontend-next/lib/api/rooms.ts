@@ -197,18 +197,9 @@ export async function deleteRoom(roomId: number): Promise<void> {
  * ```
  */
 export async function getDirectRooms(): Promise<DirectRoomResponse[]> {
-  try {
-    const response = await api.get<{ data: DirectRoomResponse[], message: string }>('/v1/rooms/direct');
-    // Backend returns { data: [...], message: "..." }
-    return response.data.data || [];
-  } catch (error: any) {
-    // Handle 404 error (backend route conflict: /rooms/:id catches /rooms/direct)
-    if (error.response?.status === 404) {
-      console.warn('Direct rooms endpoint returned 404 - this is a backend routing issue. Falling back to empty array.');
-      return [];
-    }
-    throw error;
-  }
+  const response = await api.get<{ data: DirectRoomResponse[], message: string }>('/v1/rooms/direct');
+  // Backend returns { data: [...], message: "..." }
+  return response.data.data || [];
 }
 
 /**

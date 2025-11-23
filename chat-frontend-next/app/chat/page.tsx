@@ -205,15 +205,14 @@ export default function ChatPage() {
     if (!selectedRoomId) return
 
     try {
-      const newMessage = await sendMessage({
+      await sendMessage({
         room_id: selectedRoomId,
         content,
         parent_id: parentId,
       })
 
-      // Message will be added via WebSocket broadcast
-      // But add it optimistically for immediate feedback
-      setMessages((prev) => [...prev, newMessage])
+      // Message will be added via WebSocket broadcast automatically
+      // No need for optimistic update - WebSocket is fast enough
 
       // Clear reply state after sending
       setReplyTo(null)
@@ -481,32 +480,33 @@ export default function ChatPage() {
         </div>
 
         {/* Chat List */}
-        <ScrollArea className="flex-1">
-          {loadingRooms ? (
-            <div className="flex items-center justify-center py-8">
-              <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
-            </div>
-          ) : error ? (
-            <div className="flex flex-col items-center justify-center py-8 px-4 text-center">
-              <AlertCircle className="h-8 w-8 text-red-500 mb-2" />
-              <p className="text-sm text-red-600">{error}</p>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={loadRoomsAndDMs}
-                className="mt-2"
-              >
-                Retry
-              </Button>
-            </div>
-          ) : allRooms.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
-              <p className="text-gray-500 text-sm">No conversations yet</p>
-              <p className="text-gray-400 text-xs mt-1">Start chatting with someone!</p>
-            </div>
-          ) : (
-            <div className="p-2">
-              {allRooms.map((room) => {
+        <div className="flex-1 overflow-hidden">
+          <ScrollArea className="h-full">
+            {loadingRooms ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+              </div>
+            ) : error ? (
+              <div className="flex flex-col items-center justify-center py-8 px-4 text-center">
+                <AlertCircle className="h-8 w-8 text-red-500 mb-2" />
+                <p className="text-sm text-red-600">{error}</p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={loadRoomsAndDMs}
+                  className="mt-2"
+                >
+                  Retry
+                </Button>
+              </div>
+            ) : allRooms.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
+                <p className="text-gray-500 text-sm">No conversations yet</p>
+                <p className="text-gray-400 text-xs mt-1">Start chatting with someone!</p>
+              </div>
+            ) : (
+              <div className="p-2">
+                {allRooms.map((room) => {
                 const isSelected = selectedRoomId === room.id
 
                 // Use DirectMessageCard for DMs
@@ -559,7 +559,8 @@ export default function ChatPage() {
               })}
             </div>
           )}
-        </ScrollArea>
+          </ScrollArea>
+        </div>
       </div>
 
       {/* Chat Window */}

@@ -30,8 +30,14 @@ interface DirectMessageCardProps {
 export function DirectMessageCard({ dm, isSelected = false, onClick }: DirectMessageCardProps) {
   // Get user initials for avatar
   const getInitials = (username: string) => {
-    return username
-      .split(' ')
+    const cleaned = username.replace(/[^a-zA-Z\s]/g, '')
+    const words = cleaned.split(' ').filter(word => word.length > 0)
+    
+    if (words.length === 0) {
+      return username.replace(/[^a-zA-Z]/g, '').slice(0, 2).toUpperCase() || '??'
+    }
+    
+    return words
       .map(word => word[0])
       .join('')
       .toUpperCase()

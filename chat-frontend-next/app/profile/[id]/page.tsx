@@ -72,7 +72,14 @@ export default function UserProfilePage({ params }: { params: Promise<{ id: stri
 
     if (!userData) return null;
 
-    const getInitials = (name: string) => name.split(' ').map(n => n[0]).join('').toUpperCase();
+    const getInitials = (name: string) => {
+        const cleaned = name.replace(/[^a-zA-Z\s]/g, '');
+        const words = cleaned.split(' ').filter(word => word.length > 0);
+        if (words.length === 0) {
+            return name.replace(/[^a-zA-Z]/g, '').slice(0, 2).toUpperCase() || '??';
+        }
+        return words.map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    };
 
     return (
         <div className="min-h-screen bg-white">
