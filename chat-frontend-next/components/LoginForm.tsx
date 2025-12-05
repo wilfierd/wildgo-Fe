@@ -3,9 +3,11 @@ import { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
-import { login as loginAPI } from '@/lib/api/auth';
+import { login as loginAPI, GitHubDeviceStartResponse } from '@/lib/api/auth';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
+import GitHubLoginButton from './GitHubLoginButton';
+import GitHubDeviceFlow from './GitHubDeviceFlow';
 
 export default function LoginForm() {
   const [email, setEmail] = useState('');
@@ -13,6 +15,8 @@ export default function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [githubData, setGithubData] = useState<GitHubDeviceStartResponse | null>(null);
+
   const router = useRouter();
   const { login } = useAuth();
 
@@ -59,18 +63,29 @@ export default function LoginForm() {
     }
   };
 
+  if (githubData) {
+    return (
+      <div className="w-96">
+        <GitHubDeviceFlow
+          data={githubData}
+          onCancel={() => setGithubData(null)}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="p-8 rounded-lg bg-white shadow-md w-96">
       <h2 className="text-xl font-bold mb-4">Sign In</h2>
-      
+
       {error && (
         <div className="mb-4 p-3 rounded-lg bg-red-50 border border-red-200">
           <p className="text-red-600 text-sm">{error}</p>
         </div>
       )}
-      
+
       <form onSubmit={handleSubmit}>
-        <Input 
+        <Input
           placeholder="Email"
           type="email"
           value={email}
@@ -80,7 +95,7 @@ export default function LoginForm() {
           disabled={loading}
         />
         <div className="relative mb-4">
-          <Input 
+          <Input
             type={showPassword ? "text" : "password"}
             placeholder="Password"
             value={password}
@@ -97,15 +112,31 @@ export default function LoginForm() {
             {showPassword ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
           </button>
         </div>
-        <Button 
+        <Button
           type="submit"
-          className="w-full" 
+          className="w-full"
           disabled={loading || !email || !password}
         >
           {loading ? 'Signing in...' : 'Login'}
         </Button>
       </form>
-      
+
+      <div className="relative my-6">
+        <div className="absolute inset-0 flex items-center">
+          <span className="w-full border-t" />
+        </div>
+        <div className="relative flex justify-center text-xs uppercase">
+          <span className="bg-white px-2 text-muted-foreground">
+            Or continue with
+          </span>
+        </div>
+      </div>
+
+      <GitHubLoginButton
+        onStart={(data) => setGithubData(data)}
+        onError={(msg) => setError(msg)}
+      />
+
       <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
         <p className="text-blue-700 text-sm font-medium mb-1">Demo Accounts:</p>
         <p className="text-blue-600 text-xs"><strong>Admin:</strong> admin@windgo.com / admin123</p>
