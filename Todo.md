@@ -583,21 +583,23 @@ other_user: {
    **Status:** ✅ Completed
    **Location:** chat-frontend-next/components/
 
-8. **Threaded Replies**
-   - [ ] Create `components/ThreadedMessage.tsx`
-   - [ ] Show parent message preview
-   - [ ] Reply button and UI
-   - [ ] Send with `parent_id`
+8. **Threaded Replies** ✅
+   - [x] Create `components/ThreadedMessage.tsx`
+   - [x] Show parent message preview
+   - [x] Reply button and UI
+   - [x] Send with `parent_id`
 
-   **Estimated Effort:** 3-4 hours
+   **Status:** ✅ Completed in PR #5
+   **Location:** chat-frontend-next/components/MessageActions.tsx, MessageBubble.tsx, MessageInput.tsx
 
-9. **Typing Indicators**
-   - [ ] Create `components/TypingIndicator.tsx`
-   - [ ] Use `useTypingIndicator(roomId)` hook
-   - [ ] Show "X users typing..."
-   - [ ] Send typing events on input
+9. **Typing Indicators** ✅
+   - [x] Create `components/TypingIndicator.tsx`
+   - [x] Use `useTypingIndicator(roomId)` hook
+   - [x] Show "X users typing..."
+   - [x] Send typing events on input
 
-   **Estimated Effort:** 1-2 hours
+   **Status:** ✅ Completed in PR #5
+   **Location:** chat-frontend-next/components/TypingIndicator.tsx (57 lines)
 
 10. **Room Management (Admin)** ✅
     - [x] Create `components/CreateRoomDialog.tsx`
