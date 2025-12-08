@@ -5,6 +5,15 @@ export interface User {
   username: string;
   email: string;
   role: string;
+  // Social login fields
+  provider?: string;
+  github_id?: string;
+  avatar_url?: string;
+  // Activity tracking
+  last_active_at?: string | null;
+  is_online?: boolean;
+  status?: string;
+  // Timestamps
   created_at: string;
   updated_at: string;
 }

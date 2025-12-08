@@ -370,7 +370,7 @@ chat-frontend-next/
 ├── app/
 │   ├── chat/page.tsx          ✅ Real-time chat with API/WebSocket (PR #8, #5)
 │   ├── login/page.tsx         ✅ Working
-│   ├── profile/page.tsx       ⚠️  Needs update (own profile)
+│   ├── profile/page.tsx       ✅ Own profile (Real API via useAuth)
 │   ├── profile/[id]/page.tsx  ✅ User profiles (Real API)
 │   └── ...
 └── docs/

@@ -5,8 +5,8 @@
  * Handles user search, listing available users, and user profiles.
  */
 
-import api from '../api';
-import type { User } from '../types';
+import api from "../api";
+import type { User } from "../types";
 
 /**
  * Get all users (with optional search)
@@ -25,8 +25,8 @@ import type { User } from '../types';
  */
 export async function getUsers(search?: string): Promise<User[]> {
   const params = search ? { search } : {};
-  const response = await api.get<{ data: User[], message: string }>('/v1/users', { params });
-  return response.data.data;
+  const response = await api.get<{ users: User[] }>("/v1/users", { params });
+  return response.data.users;
 }
 
 /**
@@ -41,7 +41,9 @@ export async function getUsers(search?: string): Promise<User[]> {
  * ```
  */
 export async function getAvailableUsers(): Promise<User[]> {
-  const response = await api.get<{ data: User[], message: string }>('/v1/users/available');
+  const response = await api.get<{ data: User[]; message: string }>(
+    "/v1/users/available",
+  );
   return response.data.data;
 }
 
@@ -57,6 +59,8 @@ export async function getAvailableUsers(): Promise<User[]> {
  * ```
  */
 export async function getUserById(userId: number): Promise<User> {
-  const response = await api.get<{ data: User, message: string }>(`/v1/users/${userId}`);
+  const response = await api.get<{ data: User; message: string }>(
+    `/v1/users/${userId}`,
+  );
   return response.data.data;
 }
