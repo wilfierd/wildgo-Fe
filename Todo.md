@@ -669,9 +669,6 @@ other_user: {
 - [x] `chat-frontend-next/components/GitHubLoginButton.tsx`
 - [x] `chat-frontend-next/components/GitHubDeviceFlow.tsx`
 
-### ✅ New Components Created
-- [x] `chat-frontend-next/components/ui/textarea.tsx` - ✅ Textarea UI component for bio editing
-
 ### ✅ Backend Updates (windgo-chat)
 - [x] `models/user.go` - Added `Bio` field to User model
 - [x] `handlers/auth_handlers.go` - Added `UpdateProfile` handler (PUT /api/auth/profile)

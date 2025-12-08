@@ -5,7 +5,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   ArrowLeft,
@@ -210,13 +209,13 @@ export default function ProfilePage() {
 
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-700">Bio</label>
-                <Textarea
+                <textarea
                   value={editForm.bio}
-                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                  onChange={(e) =>
                     setEditForm({ ...editForm, bio: e.target.value })
                   }
                   placeholder="Tell us about yourself..."
-                  className="bg-gray-50 border-gray-200 focus-visible:ring-black min-h-[100px]"
+                  className="bg-gray-50 border-gray-200 rounded-md px-3 py-2 text-sm w-full min-h-[100px] resize-none focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
                 />
               </div>
 
