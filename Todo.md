@@ -656,10 +656,11 @@ other_user: {
 - [x] `Todo.md`
 
 ### ⏳ Needs Update (Using Mock Data)
-- [ ] `chat-frontend-next/app/profile/page.tsx` - Own user profile (low priority)
+- [x] ~~`chat-frontend-next/app/profile/page.tsx` - Own user profile (low priority)~~ ✅ **COMPLETED**
 
 ### ✅ Recently Updated with Real API
-- [x] `chat-frontend-next/app/profile/[id]/page.tsx` - ✅ Other user profiles (Real API)
+- [x] `chat-frontend-next/app/profile/page.tsx` - ✅ Own profile (Real API + Edit bio/username)
+- [x] `chat-frontend-next/app/profile/[id]/page.tsx` - ✅ Other user profiles (Real API + bio display)
 
 ### ❌ Not Created Yet (Optional/Advanced Features)
 - [ ] `chat-frontend-next/components/ThreadedMessage.tsx`
@@ -667,6 +668,16 @@ other_user: {
 - [ ] `chat-frontend-next/components/UserListItem.tsx`
 - [x] `chat-frontend-next/components/GitHubLoginButton.tsx`
 - [x] `chat-frontend-next/components/GitHubDeviceFlow.tsx`
+
+### ✅ New Components Created
+- [x] `chat-frontend-next/components/ui/textarea.tsx` - ✅ Textarea UI component for bio editing
+
+### ✅ Backend Updates (windgo-chat)
+- [x] `models/user.go` - Added `Bio` field to User model
+- [x] `handlers/auth_handlers.go` - Added `UpdateProfile` handler (PUT /api/auth/profile)
+- [x] `handlers/user_handlers.go` - Added `GetUserById` handler (GET /api/v1/users/:id)
+- [x] `routes/auth.go` - Added PUT /api/auth/profile route
+- [x] `routes/users.go` - Added GET /api/v1/users/:id route
 
 ---
 

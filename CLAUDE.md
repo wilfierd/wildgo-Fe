@@ -2,7 +2,7 @@
 
 This document tracks the implementation progress of the Next.js frontend integration with the Go backend, following the plan outlined in `FRONTEND_BACKEND_INTEGRATION_PLAN.md`.
 
-**Last Updated:** 2025-12-06
+**Last Updated:** 2025-12-09
 **Repository:** [wildgo-Fe](https://github.com/wilfierd/wildgo-Fe)
 **Backend Repository:** [windgo-chat](https://github.com/wilfierd/windgo-chat)
 
@@ -370,8 +370,8 @@ chat-frontend-next/
 ├── app/
 │   ├── chat/page.tsx          ✅ Real-time chat with API/WebSocket (PR #8, #5)
 │   ├── login/page.tsx         ✅ Working
-│   ├── profile/page.tsx       ✅ Own profile (Real API via useAuth)
-│   ├── profile/[id]/page.tsx  ✅ User profiles (Real API)
+│   ├── profile/page.tsx       ✅ Own profile (Real API + Bio Edit)
+│   ├── profile/[id]/page.tsx  ✅ User profiles (Real API + Bio Display)
 │   └── ...
 └── docs/
     ├── API_AUTH.md            ✅ Complete
@@ -477,8 +477,17 @@ chat-frontend-next/
 ### User Endpoints
 | Endpoint | Status | Frontend | Backend | Docs |
 |----------|--------|----------|---------|------|
-| GET `/api/v1/users` | ⏳ | ❌ | ✅ | ❌ |
-| GET `/api/v1/users/available` | ⏳ | ❌ | ✅ | ❌ |
+| GET `/api/v1/users` | ✅ | ✅ | ✅ | ❌ |
+| GET `/api/v1/users/available` | ✅ | ✅ | ✅ | ❌ |
+| GET `/api/v1/users/:id` | ✅ | ✅ | ✅ | ❌ |
+| PUT `/api/auth/profile` | ✅ | ✅ | ✅ | ❌ |
+
+### User Model Fields
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | number | User ID |
+| `username` | string | Username |
+| `email
 
 ---
 

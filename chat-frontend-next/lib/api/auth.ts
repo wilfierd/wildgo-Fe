@@ -8,13 +8,14 @@
  * - POST /api/auth/register - Register a new user
  * - POST /api/auth/login - Login with email/password
  * - GET /api/auth/profile - Get current user profile
+ * - PUT /api/auth/profile - Update current user profile
  * - POST /api/auth/refresh - Refresh JWT token
  * - POST /api/auth/github/device/start - Start GitHub device flow
  * - POST /api/auth/github/device/poll - Poll GitHub device flow
  */
 
-import api from '../api';
-import { AuthResponse, LoginRequest, RegisterRequest, User } from '../types';
+import api from "../api";
+import { AuthResponse, LoginRequest, RegisterRequest, User } from "../types";
 
 /**
  * Register a new user account
@@ -33,7 +34,7 @@ import { AuthResponse, LoginRequest, RegisterRequest, User } from '../types';
  * ```
  */
 export async function register(data: RegisterRequest): Promise<AuthResponse> {
-  const response = await api.post<AuthResponse>('/auth/register', data);
+  const response = await api.post<AuthResponse>("/auth/register", data);
   return response.data;
 }
 
@@ -52,7 +53,7 @@ export async function register(data: RegisterRequest): Promise<AuthResponse> {
  * ```
  */
 export async function login(credentials: LoginRequest): Promise<AuthResponse> {
-  const response = await api.post<AuthResponse>('/auth/login', credentials);
+  const response = await api.post<AuthResponse>("/auth/login", credentials);
   return response.data;
 }
 
@@ -69,7 +70,7 @@ export async function login(credentials: LoginRequest): Promise<AuthResponse> {
  * ```
  */
 export async function getProfile(): Promise<User> {
-  const response = await api.get<User>('/auth/profile');
+  const response = await api.get<User>("/auth/profile");
   return response.data;
 }
 
@@ -86,8 +87,39 @@ export async function getProfile(): Promise<User> {
  * ```
  */
 export async function refreshToken(): Promise<{ token: string }> {
-  const response = await api.post<{ token: string }>('/auth/refresh');
+  const response = await api.post<{ token: string }>("/auth/refresh");
   return response.data;
+}
+
+/**
+ * Update Profile Request
+ */
+export interface UpdateProfileRequest {
+  username?: string;
+  bio?: string;
+}
+
+/**
+ * Update current user's profile
+ * Allows updating username and bio
+ *
+ * @param data - Profile update data
+ * @returns Promise with updated user data
+ *
+ * @example
+ * ```ts
+ * const updatedUser = await updateProfile({
+ *   username: 'newusername',
+ *   bio: 'Hello, I am a software developer!'
+ * });
+ * ```
+ */
+export async function updateProfile(data: UpdateProfileRequest): Promise<User> {
+  const response = await api.put<{ data: User; message: string }>(
+    "/auth/profile",
+    data,
+  );
+  return response.data.data;
 }
 
 /**
@@ -106,7 +138,7 @@ export interface GitHubDevicePollRequest {
 }
 
 export interface GitHubDevicePollResponse {
-  status: 'pending' | 'authorized' | 'expired' | 'error';
+  status: "pending" | "authorized" | "expired" | "error";
   token?: string;
   user?: User;
   message?: string;
@@ -125,7 +157,9 @@ export interface GitHubDevicePollResponse {
  * ```
  */
 export async function startGitHubDeviceFlow(): Promise<GitHubDeviceStartResponse> {
-  const response = await api.post<GitHubDeviceStartResponse>('/auth/github/device/start');
+  const response = await api.post<GitHubDeviceStartResponse>(
+    "/auth/github/device/start",
+  );
   return response.data;
 }
 
@@ -147,9 +181,14 @@ export async function startGitHubDeviceFlow(): Promise<GitHubDeviceStartResponse
  * };
  * ```
  */
-export async function pollGitHubDeviceFlow(deviceCode: string): Promise<GitHubDevicePollResponse> {
-  const response = await api.post<GitHubDevicePollResponse>('/auth/github/device/poll', {
-    device_code: deviceCode
-  });
+export async function pollGitHubDeviceFlow(
+  deviceCode: string,
+): Promise<GitHubDevicePollResponse> {
+  const response = await api.post<GitHubDevicePollResponse>(
+    "/auth/github/device/poll",
+    {
+      device_code: deviceCode,
+    },
+  );
   return response.data;
 }

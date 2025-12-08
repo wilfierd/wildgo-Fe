@@ -153,6 +153,11 @@ export default function UserProfilePage({
               {userData.username}
             </h2>
             <p className="text-sm text-gray-500 mt-1">@{userData.username}</p>
+            {userData.bio && (
+              <p className="text-gray-600 mt-3 text-center max-w-md">
+                {userData.bio}
+              </p>
+            )}
             <div className="flex gap-2 mt-2">
               {userData.role === "admin" && (
                 <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-black text-white">

@@ -5,6 +5,7 @@ export interface User {
   username: string;
   email: string;
   role: string;
+  bio?: string;
   // Social login fields
   provider?: string;
   github_id?: string;
