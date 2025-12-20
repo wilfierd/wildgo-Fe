@@ -30,6 +30,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { WebSocketClient, WSMessage } from '../lib/websocket';
 import { Message } from '../lib/api/messages';
+import { useWebSocketContext } from '../context/WebSocketContext';
 
 /**
  * WebSocket hook options
@@ -125,129 +126,113 @@ export function useWebSocket(
   options: UseWebSocketOptions = {}
 ): UseWebSocketReturn {
   const {
-    baseURL = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://127.0.0.1:8080',
-    autoReconnect = true,
     onConnect,
     onDisconnect,
     onError
   } = options;
 
+  const { client, isConnected: contextIsConnected } = useWebSocketContext();
   const [messages, setMessages] = useState<Message[]>([]);
-  const [isConnected, setIsConnected] = useState(false);
+  const [isConnected, setIsConnected] = useState(contextIsConnected);
   const [isReconnecting, setIsReconnecting] = useState(false);
-  const clientRef = useRef<WebSocketClient | null>(null);
   const previousRoomRef = useRef<number | null>(null);
 
   /**
    * Initialize WebSocket client
    */
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      console.warn('No token found, WebSocket not initialized');
+    if (!client) {
+      setIsConnected(false);
       return;
     }
 
-    // Create WebSocket client
-    const client = new WebSocketClient(baseURL, token);
-    clientRef.current = client;
+    setIsConnected(client.isConnected());
 
     // Setup event handlers
-    client.onConnect(() => {
+    const handleConnect = () => {
       setIsConnected(true);
       setIsReconnecting(false);
       onConnect?.();
-    });
+    };
 
-    client.onDisconnect(() => {
+    const handleDisconnect = () => {
       setIsConnected(false);
       onDisconnect?.();
-    });
+    };
 
-    client.onError((error) => {
+    const handleError = (error: Error) => {
       console.error('WebSocket error:', error);
       onError?.(error);
-    });
+    };
 
-    // Handle incoming messages
-    client.on('message', (msg: WSMessage) => {
+    const handleMessage = (msg: WSMessage) => {
       if (msg.content && typeof msg.content === 'object') {
         const message = msg.content as Message;
         setMessages(prev => [...prev, message]);
       }
-    });
-
-    // Connect to WebSocket
-    client.connect().catch(error => {
-      console.error('Failed to connect to WebSocket:', error);
-    });
-
-    // Cleanup on unmount
-    return () => {
-      if (previousRoomRef.current !== null) {
-        client.leaveRoom(previousRoomRef.current);
-      }
-      client.disconnect();
     };
-  }, [baseURL, onConnect, onDisconnect, onError]);
+
+    client.onConnect(handleConnect);
+    client.onDisconnect(handleDisconnect);
+    client.onError(handleError);
+    client.on('message', handleMessage);
+
+    // If already connected, trigger connect handler
+    if (client.isConnected()) {
+      handleConnect();
+    }
+
+    return () => {
+      client.off('message', handleMessage);
+      client.offConnect(handleConnect);
+      client.offDisconnect(handleDisconnect);
+      client.offError(handleError);
+    };
+  }, [client, onConnect, onDisconnect, onError]);
 
   /**
    * Join/leave rooms when roomId changes
    */
   useEffect(() => {
-    if (!clientRef.current) return;
+    if (!client) return;
 
     // Leave previous room if any
     if (previousRoomRef.current !== null) {
-      clientRef.current.leaveRoom(previousRoomRef.current);
+      client.leaveRoom(previousRoomRef.current);
     }
 
     // Join new room if specified
     if (roomId !== null) {
-      clientRef.current.joinRoom(roomId);
+      client.joinRoom(roomId);
       previousRoomRef.current = roomId;
     }
 
     return () => {
-      if (roomId !== null && clientRef.current) {
-        clientRef.current.leaveRoom(roomId);
+      if (roomId !== null && client) {
+        client.leaveRoom(roomId);
       }
     };
-  }, [roomId]);
+  }, [roomId, client]);
 
   /**
    * Send typing indicator
    */
   const sendTyping = useCallback((isTyping: boolean) => {
-    if (clientRef.current && roomId !== null) {
-      clientRef.current.sendTyping(roomId, isTyping);
+    if (client && roomId !== null) {
+      client.sendTyping(roomId, isTyping);
     }
-  }, [roomId]);
+  }, [roomId, client]);
 
   /**
    * Manually reconnect
    */
   const reconnect = useCallback(() => {
-    if (clientRef.current) {
+    if (client) {
       setIsReconnecting(true);
-      clientRef.current.disconnect();
-
-      const token = localStorage.getItem('token');
-      if (token) {
-        const client = new WebSocketClient(baseURL, token);
-        clientRef.current = client;
-
-        client.connect().then(() => {
-          setIsConnected(true);
-          setIsReconnecting(false);
-
-          if (roomId !== null) {
-            client.joinRoom(roomId);
-          }
-        });
-      }
+      client.disconnect();
+      client.connect().catch(console.error);
     }
-  }, [baseURL, roomId]);
+  }, [client]);
 
   /**
    * Clear all messages
@@ -263,7 +248,7 @@ export function useWebSocket(
     sendTyping,
     reconnect,
     clearMessages,
-    client: clientRef.current
+    client
   };
 }
 
@@ -271,12 +256,13 @@ export function useWebSocket(
  * Hook for listening to typing indicators in a room
  *
  * @param roomId - Room ID to monitor
+ * @param currentUserId - Current user ID to filter self-typing
  * @returns Array of user IDs currently typing
  *
  * @example
  * ```tsx
- * function TypingIndicator({ roomId }: { roomId: number }) {
- *   const typingUsers = useTypingIndicator(roomId);
+ * function TypingIndicator({ roomId, currentUserId }: { roomId: number, currentUserId: number }) {
+ *   const typingUsers = useTypingIndicator(roomId, currentUserId);
  *
  *   if (typingUsers.length === 0) return null;
  *
@@ -284,21 +270,25 @@ export function useWebSocket(
  * }
  * ```
  */
-export function useTypingIndicator(roomId: number | null): number[] {
+export function useTypingIndicator(roomId: number | null, currentUserId?: number): number[] {
+  const { client } = useWebSocketContext();
   const [typingUsers, setTypingUsers] = useState<number[]>([]);
   const timeoutsRef = useRef<Map<number, NodeJS.Timeout>>(new Map());
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token || roomId === null) return;
+    if (!client || roomId === null) return;
 
-    const baseURL = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://127.0.0.1:8080';
-    const client = new WebSocketClient(baseURL, token);
+    // Join the room to listen for events
+    client.joinRoom(roomId);
 
-    client.on('typing', (msg: WSMessage) => {
+    const handleTyping = (msg: WSMessage) => {
       if (msg.room_id !== roomId) return;
 
       const userId = msg.user_id;
+
+      // Filter out self-typing if currentUserId is provided
+      if (currentUserId && userId === currentUserId) return;
+
       const isTyping = msg.content?.typing === true;
 
       if (isTyping) {
@@ -333,21 +323,19 @@ export function useTypingIndicator(roomId: number | null): number[] {
           timeoutsRef.current.delete(userId);
         }
       }
-    });
+    };
 
-    client.connect().then(() => {
-      client.joinRoom(roomId);
-    });
+    client.on('typing', handleTyping);
 
     return () => {
       // Clear all timeouts
       timeoutsRef.current.forEach(timeout => clearTimeout(timeout));
       timeoutsRef.current.clear();
 
+      client.off('typing', handleTyping);
       client.leaveRoom(roomId);
-      client.disconnect();
     };
-  }, [roomId]);
+  }, [roomId, client, currentUserId]);
 
   return typingUsers;
 }
@@ -371,16 +359,13 @@ export function useTypingIndicator(roomId: number | null): number[] {
  * ```
  */
 export function useOnlineUsers(): number[] {
+  const { client } = useWebSocketContext();
   const [onlineUsers, setOnlineUsers] = useState<number[]>([]);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) return;
+    if (!client) return;
 
-    const baseURL = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://127.0.0.1:8080';
-    const client = new WebSocketClient(baseURL, token);
-
-    client.on('join', (msg: WSMessage) => {
+    const handleJoin = (msg: WSMessage) => {
       const userId = msg.user_id;
       setOnlineUsers(prev => {
         if (!prev.includes(userId)) {
@@ -388,19 +373,21 @@ export function useOnlineUsers(): number[] {
         }
         return prev;
       });
-    });
+    };
 
-    client.on('leave', (msg: WSMessage) => {
+    const handleLeave = (msg: WSMessage) => {
       const userId = msg.user_id;
       setOnlineUsers(prev => prev.filter(id => id !== userId));
-    });
+    };
 
-    client.connect();
+    client.on('join', handleJoin);
+    client.on('leave', handleLeave);
 
     return () => {
-      client.disconnect();
+      client.off('join', handleJoin);
+      client.off('leave', handleLeave);
     };
-  }, []);
+  }, [client]);
 
   return onlineUsers;
 }

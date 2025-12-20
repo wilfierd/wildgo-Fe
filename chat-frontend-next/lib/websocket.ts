@@ -51,6 +51,7 @@ export class WebSocketClient {
   private reconnectDelay: number = 5000; // Start with 5 seconds
   private maxReconnectDelay: number = 60000; // Max 60 seconds
   private currentRooms: Set<number> = new Set();
+  private roomRefCounts: Map<number, number> = new Map();
   private reconnectAttempts: number = 0;
 
   // Event handlers
@@ -204,15 +205,22 @@ export class WebSocketClient {
    * ```
    */
   public joinRoom(roomId: number): void {
-    this.currentRooms.add(roomId);
+    // Increment reference count
+    const count = this.roomRefCounts.get(roomId) || 0;
+    this.roomRefCounts.set(roomId, count + 1);
 
-    if (this.isConnected()) {
-      this.send({
-        type: 'join',
-        room_id: roomId,
-        user_id: 0, // Will be set by server
-        content: { room_id: roomId }
-      });
+    // Only join if this is the first reference
+    if (count === 0) {
+      this.currentRooms.add(roomId);
+
+      if (this.isConnected()) {
+        this.send({
+          type: 'join',
+          room_id: roomId,
+          user_id: 0, // Will be set by server
+          content: { room_id: roomId }
+        });
+      }
     }
   }
 
@@ -227,15 +235,26 @@ export class WebSocketClient {
    * ```
    */
   public leaveRoom(roomId: number): void {
-    this.currentRooms.delete(roomId);
+    const count = this.roomRefCounts.get(roomId) || 0;
 
-    if (this.isConnected()) {
-      this.send({
-        type: 'leave',
-        room_id: roomId,
-        user_id: 0, // Will be set by server
-        content: { room_id: roomId }
-      });
+    if (count > 0) {
+      const newCount = count - 1;
+      this.roomRefCounts.set(roomId, newCount);
+
+      // Only leave if no more references
+      if (newCount === 0) {
+        this.currentRooms.delete(roomId);
+        this.roomRefCounts.delete(roomId);
+
+        if (this.isConnected()) {
+          this.send({
+            type: 'leave',
+            room_id: roomId,
+            user_id: 0, // Will be set by server
+            content: { room_id: roomId }
+          });
+        }
+      }
     }
   }
 
@@ -326,6 +345,13 @@ export class WebSocketClient {
   }
 
   /**
+   * Remove error handler
+   */
+  public offError(handler: WSErrorHandler): void {
+    this.errorHandlers.delete(handler);
+  }
+
+  /**
    * Register connection handler
    *
    * @param handler - Connection handler function
@@ -342,6 +368,13 @@ export class WebSocketClient {
   }
 
   /**
+   * Remove connection handler
+   */
+  public offConnect(handler: WSConnectionHandler): void {
+    this.connectHandlers.delete(handler);
+  }
+
+  /**
    * Register disconnection handler
    *
    * @param handler - Disconnection handler function
@@ -355,6 +388,13 @@ export class WebSocketClient {
    */
   public onDisconnect(handler: WSConnectionHandler): void {
     this.disconnectHandlers.add(handler);
+  }
+
+  /**
+   * Remove disconnection handler
+   */
+  public offDisconnect(handler: WSConnectionHandler): void {
+    this.disconnectHandlers.delete(handler);
   }
 
   /**
