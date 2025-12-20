@@ -1,31 +1,19 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Github } from 'lucide-react';
-import { startGitHubDeviceFlow, GitHubDeviceStartResponse } from '@/lib/api/auth';
 
 interface GitHubLoginButtonProps {
-    onStart: (data: GitHubDeviceStartResponse) => void;
     onError?: (error: string) => void;
 }
 
-export default function GitHubLoginButton({ onStart, onError }: GitHubLoginButtonProps) {
+export default function GitHubLoginButton({ onError }: GitHubLoginButtonProps) {
     const [loading, setLoading] = useState(false);
 
-    const handleClick = async () => {
+    const handleClick = () => {
         setLoading(true);
-        try {
-            const data = await startGitHubDeviceFlow();
-            onStart(data);
-        } catch (error: any) {
-            const errorMessage = error.response?.data?.error || error.message || 'Failed to start GitHub login';
-            if (onError) {
-                onError(errorMessage);
-            } else {
-                console.error('GitHub login error:', error);
-            }
-        } finally {
-            setLoading(false);
-        }
+        // Web Flow - redirect to backend OAuth
+        const baseUrl = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api').replace(/\/api$/, '');
+        window.location.href = `${baseUrl}/api/auth/github/login`;
     };
 
     return (
@@ -37,7 +25,7 @@ export default function GitHubLoginButton({ onStart, onError }: GitHubLoginButto
             type="button"
         >
             <Github className="mr-2 h-4 w-4" />
-            {loading ? 'Connecting...' : 'Login with GitHub'}
+            {loading ? 'Redirecting...' : 'Login with GitHub'}
         </Button>
     );
 }

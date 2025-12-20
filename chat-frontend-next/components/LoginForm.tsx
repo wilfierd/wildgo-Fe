@@ -133,7 +133,6 @@ export default function LoginForm() {
       </div>
 
       <GitHubLoginButton
-        onStart={(data) => setGithubData(data)}
         onError={(msg) => setError(msg)}
       />
 
