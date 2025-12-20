@@ -18,6 +18,7 @@ import { CreateRoomDialog } from "@/components/CreateRoomDialog"
 import { EditRoomDialog } from "@/components/EditRoomDialog"
 import { DeleteRoomConfirm } from "@/components/DeleteRoomConfirm"
 import { RoomMembersManager } from "@/components/RoomMembersManager"
+import { WebSocketProvider } from "@/context/WebSocketContext"
 import {
   Search,
   MoreVertical,
@@ -40,6 +41,14 @@ import { getRooms, getDirectRooms, markRoomAsRead } from "@/lib/api/rooms"
 import { getMessages, sendMessage, updateMessage, deleteMessage } from "@/lib/api/messages"
 
 export default function ChatPage() {
+  return (
+    <WebSocketProvider>
+      <ChatPageContent />
+    </WebSocketProvider>
+  )
+}
+
+function ChatPageContent() {
   const { isAuthenticated, loading: authLoading, user } = useAuth()
   const router = useRouter()
 

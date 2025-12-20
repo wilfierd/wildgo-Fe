@@ -2,6 +2,7 @@
 
 import type React from "react"
 import { useTypingIndicator } from "@/hooks/useWebSocket"
+import { useAuth } from "@/hooks/useAuth"
 
 interface TypingIndicatorProps {
   roomId: number | null
@@ -24,7 +25,8 @@ interface TypingIndicatorProps {
  * ```
  */
 export function TypingIndicator({ roomId }: TypingIndicatorProps) {
-  const typingUsers = useTypingIndicator(roomId)
+  const { user } = useAuth()
+  const typingUsers = useTypingIndicator(roomId, user?.id)
 
   // Don't show if no one is typing
   if (typingUsers.length === 0) {
