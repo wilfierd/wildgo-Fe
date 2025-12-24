@@ -12,7 +12,7 @@ export default function GitHubLoginButton({ onError }: GitHubLoginButtonProps) {
     const handleClick = () => {
         setLoading(true);
         // Web Flow - redirect to backend OAuth
-        const baseUrl = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api').replace(/\/api$/, '');
+        const baseUrl = (process.env.NEXT_PUBLIC_API_URL || '/api').replace(/\/api$/, '');
         window.location.href = `${baseUrl}/api/auth/github/login`;
     };
 

@@ -125,7 +125,7 @@ export function useWebSocket(
   options: UseWebSocketOptions = {}
 ): UseWebSocketReturn {
   const {
-    baseURL = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:8080',
+    baseURL = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || '',
     autoReconnect = true,
     onConnect,
     onDisconnect,
@@ -292,7 +292,7 @@ export function useTypingIndicator(roomId: number | null): number[] {
     const token = localStorage.getItem('token');
     if (!token || roomId === null) return;
 
-    const baseURL = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://127.0.0.1:8080';
+    const baseURL = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || '';
     const client = new WebSocketClient(baseURL, token);
 
     client.on('typing', (msg: WSMessage) => {
@@ -377,7 +377,7 @@ export function useOnlineUsers(): number[] {
     const token = localStorage.getItem('token');
     if (!token) return;
 
-    const baseURL = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://127.0.0.1:8080';
+    const baseURL = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || '';
     const client = new WebSocketClient(baseURL, token);
 
     client.on('join', (msg: WSMessage) => {

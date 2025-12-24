@@ -39,7 +39,7 @@ export default function LoginForm() {
       }
     } catch (error: any) {
       if (error.code === 'ERR_NETWORK') {
-        setError('Cannot connect to server. Make sure the backend is running on http://localhost:8080');
+        setError('Cannot connect to server. Please check your connection.');
       } else if (error.response) {
         setError(error.response?.data?.error || `Login failed: ${error.response.status}`);
       } else {
