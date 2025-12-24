@@ -1,0 +1,62 @@
+# Nginx Configuration for WildGo Chat (Static Export)
+#
+# Place this file in /etc/nginx/sites-available/ and create symlink to sites-enabled
+# sudo ln -s /etc/nginx/sites-available/wildgo-chat.conf /etc/nginx/sites-enabled/
+
+server {
+    listen 80;
+    server_name your-domain.com;  # Change this to your domain
+
+    # Static files location (adjust path to where you deployed the 'out' folder)
+    root /var/www/wildgo-chat/out;
+    index index.html;
+
+    # Gzip compression
+    gzip on;
+    gzip_vary on;
+    gzip_min_length 1024;
+    gzip_types text/plain text/css text/xml text/javascript application/javascript application/json application/xml+rss;
+
+    # Cache static assets
+    location /_next/static/ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+    }
+
+    # Handle SPA routing - try files, then directories, then fallback to index.html
+    location / {
+        try_files $uri $uri.html $uri/ /index.html;
+    }
+
+    # Security headers
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+
+    # Rate limiting (optional)
+    # limit_req_zone $binary_remote_addr zone=one:10m rate=10r/s;
+    # location / {
+    #     limit_req zone=one burst=20 nodelay;
+    # }
+}
+
+# HTTPS version (recommended for production)
+# server {
+#     listen 443 ssl http2;
+#     server_name your-domain.com;
+#
+#     ssl_certificate /etc/letsencrypt/live/your-domain.com/fullchain.pem;
+#     ssl_certificate_key /etc/letsencrypt/live/your-domain.com/privkey.pem;
+#
+#     root /var/www/wildgo-chat/out;
+#     index index.html;
+#
+#     # ... same location blocks as above
+# }
+
+# Redirect HTTP to HTTPS
+# server {
+#     listen 80;
+#     server_name your-domain.com;
+#     return 301 https://$server_name$request_uri;
+# }
