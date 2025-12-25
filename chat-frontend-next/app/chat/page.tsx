@@ -84,43 +84,6 @@ export default function ChatPage() {
     }
   }, [isAuthenticated, authLoading, router])
 
-  // Load rooms and DMs on mount
-  useEffect(() => {
-    if (isAuthenticated) {
-      loadRoomsAndDMs()
-    }
-  }, [isAuthenticated])
-
-  // Load messages when room is selected
-  useEffect(() => {
-    if (selectedRoomId !== null) {
-      loadMessagesForRoom(selectedRoomId, 1)
-      markAsRead(selectedRoomId)
-    }
-  }, [selectedRoomId])
-
-  // Append WebSocket messages to the message list
-  useEffect(() => {
-    if (wsMessages.length > 0) {
-      setMessages((prev) => {
-        // Filter out duplicates
-        const newMessages = wsMessages.filter(
-          (wsMsg) => !prev.some((msg) => msg.id === wsMsg.id)
-        )
-        return [...prev, ...newMessages]
-      })
-
-      // Mark room as read when new messages arrive
-      if (selectedRoomId) {
-        markAsRead(selectedRoomId)
-      }
-
-      // Reload rooms to update the order (most recent on top)
-      // This ensures the chat list shows the most recently active rooms first
-      loadRoomsAndDMs()
-    }
-  }, [wsMessages, selectedRoomId])
-
   // Load rooms and DMs
   const loadRoomsAndDMs = async () => {
     try {
@@ -150,6 +113,13 @@ export default function ChatPage() {
       setLoadingRooms(false)
     }
   }
+
+  // Load rooms and DMs on mount
+  useEffect(() => {
+    if (isAuthenticated) {
+      loadRoomsAndDMs()
+    }
+  }, [isAuthenticated])
 
   // Load messages for a room
   const loadMessagesForRoom = async (roomId: number, page: number) => {
@@ -199,6 +169,76 @@ export default function ChatPage() {
       console.error('Failed to mark room as read:', err)
     }
   }, [])
+
+  // Load messages when room is selected
+  useEffect(() => {
+    if (selectedRoomId !== null) {
+      loadMessagesForRoom(selectedRoomId, 1)
+      markAsRead(selectedRoomId)
+    }
+  }, [selectedRoomId, markAsRead])
+
+  // Update room list locally when new message arrives
+  const updateRoomList = useCallback((message: Message) => {
+    // Update Direct Rooms
+    setDirectRooms((prev) => {
+      const index = prev.findIndex((r) => r.id === message.room_id)
+      if (index !== -1) {
+        const updatedRoom = {
+          ...prev[index],
+          last_message: {
+            content: message.content,
+            created_at: message.created_at,
+          },
+          unread_count: 0 // Reset unread count since we are viewing it
+        }
+        const newRooms = [...prev]
+        newRooms.splice(index, 1)
+        return [updatedRoom, ...newRooms]
+      }
+      return prev
+    })
+
+    // Update Group Rooms
+    setRooms((prev) => {
+      const index = prev.findIndex((r) => r.id === message.room_id)
+      if (index !== -1) {
+        const updatedRoom = {
+          ...prev[index],
+          updated_at: message.created_at,
+          unread_count: 0 // Reset unread count since we are viewing it
+        }
+        const newRooms = [...prev]
+        newRooms.splice(index, 1)
+        return [updatedRoom, ...newRooms]
+      }
+      return prev
+    })
+  }, [])
+
+  // Append WebSocket messages to the message list
+  useEffect(() => {
+    if (wsMessages.length > 0) {
+      setMessages((prev) => {
+        // Filter out duplicates
+        const newMessages = wsMessages.filter(
+          (wsMsg) => !prev.some((msg) => msg.id === wsMsg.id)
+        )
+        return [...prev, ...newMessages]
+      })
+
+      // Mark room as read when new messages arrive
+      if (selectedRoomId) {
+        markAsRead(selectedRoomId)
+      }
+
+      // Update room list order locally
+      const lastMessage = wsMessages[wsMessages.length - 1]
+      if (lastMessage) {
+        updateRoomList(lastMessage)
+      }
+    }
+  }, [wsMessages, selectedRoomId, updateRoomList, markAsRead])
 
   // Send message (with optional parent_id for threaded replies)
   const handleSendMessage = async (content: string, parentId?: number) => {
