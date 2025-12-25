@@ -16,13 +16,21 @@ export default function AuthCallback() {
     if (processed.current) return;
     processed.current = true;
 
+    // Debug: log full URL
+    console.log('Auth callback - Full URL:', window.location.href);
+    console.log('Auth callback - Hash:', window.location.hash);
+    console.log('Auth callback - Search:', window.location.search);
+
     const hash = window.location.hash.substring(1);
     const params = new URLSearchParams(hash);
     const token = params.get('token');
-    
+
     const search = new URLSearchParams(window.location.search);
     const queryToken = search.get('token');
     const queryError = search.get('error');
+
+    console.log('Auth callback - Token from hash:', token);
+    console.log('Auth callback - Token from query:', queryToken);
 
     if (queryError) {
       setStatus('error');
@@ -33,12 +41,14 @@ export default function AuthCallback() {
     const finalToken = token || queryToken;
 
     if (finalToken) {
+      console.log('Auth callback - Saving token and redirecting to /chat');
       localStorage.setItem('token', finalToken);
       setStatus('success');
       setTimeout(() => {
         window.location.href = '/chat';
       }, 1000);
     } else {
+      console.log('Auth callback - No token found!');
       setStatus('error');
       setError('No token received');
     }
