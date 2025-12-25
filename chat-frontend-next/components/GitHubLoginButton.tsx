@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Github } from 'lucide-react';
+import { WS_BASE_URL } from '@/lib/api';
 
 interface GitHubLoginButtonProps {
     onError?: (error: string) => void;
@@ -12,8 +13,7 @@ export default function GitHubLoginButton({ onError }: GitHubLoginButtonProps) {
     const handleClick = () => {
         setLoading(true);
         // Web Flow - redirect to backend OAuth
-        const baseUrl = (process.env.NEXT_PUBLIC_API_URL || '/api').replace(/\/api$/, '');
-        window.location.href = `${baseUrl}/api/auth/github/login`;
+        window.location.href = `${WS_BASE_URL}/api/auth/github/login`;
     };
 
     return (

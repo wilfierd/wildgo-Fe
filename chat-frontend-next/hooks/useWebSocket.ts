@@ -30,6 +30,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { WebSocketClient, WSMessage } from '../lib/websocket';
 import { Message } from '../lib/api/messages';
+import { WS_BASE_URL } from '../lib/api';
 
 /**
  * WebSocket hook options
@@ -125,7 +126,7 @@ export function useWebSocket(
   options: UseWebSocketOptions = {}
 ): UseWebSocketReturn {
   const {
-    baseURL = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || '',
+    baseURL = WS_BASE_URL,
     autoReconnect = true,
     onConnect,
     onDisconnect,
@@ -292,8 +293,7 @@ export function useTypingIndicator(roomId: number | null): number[] {
     const token = localStorage.getItem('token');
     if (!token || roomId === null) return;
 
-    const baseURL = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || '';
-    const client = new WebSocketClient(baseURL, token);
+    const client = new WebSocketClient(WS_BASE_URL, token);
 
     client.on('typing', (msg: WSMessage) => {
       if (msg.room_id !== roomId) return;
@@ -377,8 +377,7 @@ export function useOnlineUsers(): number[] {
     const token = localStorage.getItem('token');
     if (!token) return;
 
-    const baseURL = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || '';
-    const client = new WebSocketClient(baseURL, token);
+    const client = new WebSocketClient(WS_BASE_URL, token);
 
     client.on('join', (msg: WSMessage) => {
       const userId = msg.user_id;
