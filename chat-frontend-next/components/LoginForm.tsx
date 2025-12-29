@@ -135,6 +135,11 @@ export default function LoginForm() {
       <GitHubLoginButton
         onError={(msg) => setError(msg)}
       />
+      <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+        <p className="text-blue-700 text-sm font-medium mb-1">Demo Accounts:</p>
+        <p className="text-blue-600 text-xs"><strong>User:</strong> test@windgo.com / test123</p>
+      </div>
+
 
     </div>
   );
